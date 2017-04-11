@@ -1,0 +1,26 @@
+{
+	#配置各组件公共包名和所在包名
+	"packageName": "com.zong.web",
+	"packageBean": "bean",
+	"packageMapper": "dao",
+	"packageService": "service",
+	"packageController": "controller",
+	"packageJsp": "info",
+	#数据库连接配置
+	"dbs":[
+               {
+			"dbname": "zapi",
+			"jdbc.driverClassName": "com.mysql.jdbc.Driver",
+			"jdbc.url": "jdbc:mysql://localhost:3306/zapi",
+			"jdbc.username": "root",
+			"jdbc.password": "Zong"
+		},
+		{
+			"dbname": "good",
+			"jdbc.driverClassName": "com.mysql.jdbc.Driver",
+			"jdbc.url": "jdbc:mysql://localhost:3306/good",
+			"jdbc.username": "root",
+			"jdbc.password": "Zong"
+		}
+	]
+}
