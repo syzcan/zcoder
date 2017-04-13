@@ -1,6 +1,7 @@
 package com.zong.web.dbclient.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.zong.util.BeetlUtil;
 import com.zong.util.Config;
 import com.zong.util.CreateCodeUtil;
 import com.zong.util.FileUploadDownload;
@@ -41,7 +44,8 @@ public class DatabaseController extends BaseController {
 	}
 
 	@RequestMapping(value = "/{dbname}/tables/{tableName}")
-	public String tables(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, Model model) {
+	public String tables(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			Model model) {
 		model.addAttribute("dbname", dbname);
 		model.addAttribute("tableName", tableName);
 		model.addAttribute("columns", codeService.showTableColumns(dbname, tableName));
@@ -50,7 +54,8 @@ public class DatabaseController extends BaseController {
 	}
 
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/datas")
-	public String datas(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, Model model) {
+	public String datas(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			Model model) {
 		Page page = getPage();
 		page.getPd().put("tableName", tableName);
 		model.addAttribute("dbname", dbname);
@@ -61,7 +66,8 @@ public class DatabaseController extends BaseController {
 		for (PageData pd : datas) {
 			for (ColumnField columnField : columns) {
 				String value = pd.getString(columnField.getColumn());
-				pd.put(columnField.getColumn(), value == null ? "" : value.replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
+				pd.put(columnField.getColumn(),
+						value == null ? "" : value.replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 			}
 		}
 		model.addAttribute("datas", datas);
@@ -70,7 +76,8 @@ public class DatabaseController extends BaseController {
 	}
 
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/sqldatas")
-	public String sqldatas(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,String sql, Model model) {
+	public String sqldatas(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			String sql, Model model) {
 		Page page = getPage();
 		page.getPd().put("tableName", tableName);
 		model.addAttribute("dbname", dbname);
@@ -86,14 +93,16 @@ public class DatabaseController extends BaseController {
 
 	@ResponseBody
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/data")
-	public List<PageData> data(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, Model model) {
+	public List<PageData> data(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			Model model) {
 		Page page = getPage();
 		page.getPd().put("tableName", tableName);
 		return codeService.showTableDatas(dbname, page);
 	}
 
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/code")
-	public String code(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, Model model) {
+	public String code(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			Model model) {
 		model.addAttribute("dbname", dbname);
 		model.addAttribute("tableName", tableName);
 		model.addAttribute("tableEntity", codeService.showTable(dbname, tableName));
@@ -106,16 +115,34 @@ public class DatabaseController extends BaseController {
 	 * 根据freemaker生成当前表的文件字符串返回
 	 *
 	 * @param tableName
-	 * @param type
-	 *            bean、mapperJava、mapperXml
+	 * @param type bean、mapperJava、mapperXml
 	 * @param model
 	 * @return
 	 */
 	@ResponseBody
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/code/{type}")
-	public String code(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, @PathVariable("type") String type, String objectName, String className,
-			String packageName, Model model) {
-		String result = CreateCodeUtil.createCode(dbname, codeService.showTable(dbname, tableName), type, objectName, className, packageName);
+	public String code(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			@PathVariable("type") String type, String objectName, String className, String packageName, Model model) {
+		String result = CreateCodeUtil.createCode(dbname, codeService.showTable(dbname, tableName), type, objectName,
+				className, packageName);
+		return result;
+	}
+
+	/**
+	 * 根据beetl模板生成当前表的文件字符串返回
+	 *
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/{dbname}/tables/{tableName}/beetlCode", method = RequestMethod.POST, produces = "text/plain;charset=utf-8")
+	public String beetlCode(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			String btl, Model model) {
+		String result = "";
+		try {
+			result = BeetlUtil.printBtl(btl, codeService.showTable(dbname, tableName).getRoot());
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = e.toString();
+		}
 		return result;
 	}
 
@@ -123,11 +150,12 @@ public class DatabaseController extends BaseController {
 	 * 下载代码code.zip
 	 */
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/downCode")
-	public void downCode(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, String objectName, String className, String packageName,
-			HttpServletResponse response) {
+	public void downCode(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
+			String objectName, String className, String packageName, HttpServletResponse response) {
 		try {
 			// 生成代码
-			String filePath = CreateCodeUtil.downCode(dbname, codeService.showTable(dbname, tableName), objectName, className, packageName);
+			String filePath = CreateCodeUtil.downCode(dbname, codeService.showTable(dbname, tableName), objectName,
+					className, packageName);
 			// 下载
 			FileUploadDownload.fileDownload(response, filePath, "code_" + tableName + ".zip");
 		} catch (Exception e) {
