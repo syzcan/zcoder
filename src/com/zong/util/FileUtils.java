@@ -261,7 +261,7 @@ public class FileUtils {
 
 	public static void main(String[] args) {
 		// 复制加后缀_
-//		List<File> list = listFile("E:\\zong-dbclient", "java");
+//		List<File> list = listFile("E:\\zcoder", "java");
 //		for (File file : list) {
 //			cmdCopy(file.getAbsolutePath(), file.getAbsolutePath() + "_");
 //		}
