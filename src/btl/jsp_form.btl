@@ -3,10 +3,10 @@
 <form action="\${ctx}/${objectName}/\${formType=='edit'?'edit':'add'}" class="form-x" method="post">
 	<div class="panel">
 		<div class="panel-body">
-			<% for(columnField in tableEntity.primaries){%>
+			<% for(columnField in primaryColumns){%>
 			<input type="hidden" name="${columnField.field}" value="\${${objectName}.${columnField.field} }" />
 			<%}%>
-			<% for(columnField in tableEntity.columnFields){%>
+			<% for(columnField in normalColumns){%>
 			<div class="form-group">
 				<div class="label">
 					<label><%if(has(columnField.remark) && columnField.remark!=""){%>${columnField.remark}<%}else{%>${columnField.field}<%}%></label>

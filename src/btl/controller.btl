@@ -17,7 +17,7 @@ import ${packageBean}.${className};
 import ${packageService}.${className}Service;
 
 /**
- * @desc ${objectName}控制层 ${tableEntity.comment}
+ * @desc ${objectName}控制层 ${comment}
  * @author zong
  * @date ${date(),"yyyy年MM月dd日"}
  */

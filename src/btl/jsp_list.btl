@@ -26,7 +26,7 @@
 					<thead>
 						<tr>
 							<th><input type="checkbox" class="checkall" name="checkall" checkfor="id" /></th>
-							<% for(columnField in tableEntity.columnFields){%>
+							<% for(columnField in normalColumns){%>
 							<%if(has(columnField.remark) && columnField.remark!=""){%>
 							<th>${columnField.remark}</th>
 							<%}else{%>
@@ -39,9 +39,9 @@
 					<c:forEach items="\${${objectName}s }" var="${objectName}">
 						<tr>
 							<td>
-								<input type="checkbox" name="id" value="\${${objectName}.${tableEntity.primary.field} }" />
+								<input type="checkbox" name="id" value="\${${objectName}.${primary.field} }" />
 							</td>
-							<% for(columnField in tableEntity.columnFields){%>
+							<% for(columnField in normalColumns){%>
 							<%if(columnField.jdbcType=="TIMESTAMP"){%>
 							<td><fmt:formatDate value="\${${objectName}.${columnField.field} }" pattern="yyyy-MM-dd"/></td>
 							<%}else{%>
@@ -49,9 +49,9 @@
 							<%}%>
 							<%}%>
 							<td>
-								<a class="button border-green button-little" href="javascript:;" onclick="openDiv('<strong>\${${objectName}.${tableEntity.primary.field} }</strong>','\${ctx}/${objectName}/view?${tableEntity.primary.field}=\${${objectName}.${tableEntity.primary.field} }','760px','600px')">查看</a>
-								<a class="button border-blue button-little" href="javascript:;" onclick="openView('修改','\${ctx}/${objectName}/toEdit?${tableEntity.primary.field}=\${${objectName}.${tableEntity.primary.field} }')">修改</a> 
-								<a class="button border-yellow button-little" href="javascript:;" onclick="ajaxDeleteData('\${ctx}/${objectName}/delete?${tableEntity.primary.field}=\${${objectName}.${tableEntity.primary.field} }')">删除</a>
+								<a class="button border-green button-little" href="javascript:;" onclick="openDiv('<strong>\${${objectName}.${primary.field} }</strong>','\${ctx}/${objectName}/view?${primary.field}=\${${objectName}.${primary.field} }','760px','600px')">查看</a>
+								<a class="button border-blue button-little" href="javascript:;" onclick="openView('修改','\${ctx}/${objectName}/toEdit?${primary.field}=\${${objectName}.${primary.field} }')">修改</a> 
+								<a class="button border-yellow button-little" href="javascript:;" onclick="ajaxDeleteData('\${ctx}/${objectName}/delete?${primary.field}=\${${objectName}.${primary.field} }')">删除</a>
 							</td>
 						</tr>
 					</c:forEach>

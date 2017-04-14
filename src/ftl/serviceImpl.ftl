@@ -29,8 +29,8 @@ public class ${className}ServiceImpl implements ${className}Service {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public void add${className}(${className} ${objectName}) throws Exception {
-		<#if tableEntity.primary.type=="String">
-		//${objectName}.set${tableEntity.primary.fieldUpper}(UUID.randomUUID().toString().trim().replaceAll("-", ""));
+		<#if primary.javaType=="String">
+		//${objectName}.set${primary.fieldUpper}(UUID.randomUUID().toString().trim().replaceAll("-", ""));
 		</#if>
 		${objectName}Mapper.insert(${objectName});
 	}
@@ -53,7 +53,7 @@ public class ${className}ServiceImpl implements ${className}Service {
 		if(ids!=null && ids.length>0){
 			${className} ${objectName} = new ${className}();
 			for (String id : ids) {
-				${objectName}.set${tableEntity.primary.fieldUpper}(id);
+				${objectName}.set${primary.fieldUpper}(id);
 				${objectName}Mapper.delete(${objectName});
 			}
 		}

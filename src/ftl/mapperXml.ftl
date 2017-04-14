@@ -2,18 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="${packageMapper}.${className}Mapper" >
   <resultMap id="BaseResultMap" type="${packageBean}.${className}" >
-    <#list tableEntity.primaries as columnField>
+    <#list primaryColumns as columnField>
     <id column="${columnField.column}" property="${columnField.field}" jdbcType="${columnField.jdbcType}" />
     </#list>
-    <#list tableEntity.columnFields as columnField>
+    <#list normalColumns as columnField>
     <result column="${columnField.column}" property="${columnField.field}" jdbcType="${columnField.jdbcType}" />
     </#list>
   </resultMap>
   <sql id="Base_Column_List" >
-  	<#list tableEntity.primaries as columnField>
+  	<#list primaryColumns as columnField>
     ${columnField.column},
     </#list>
-  	<#list tableEntity.columnFields as columnField>
+  	<#list normalColumns as columnField>
   	<#if columnField_has_next>
     ${columnField.column},
   	</#if>
@@ -27,9 +27,9 @@
   <select id="load" resultMap="BaseResultMap" >
     select 
     <include refid="Base_Column_List" />
-    from ${tableEntity.tableName}
+    from ${tableName}
     where
-  	<#list tableEntity.primaries as columnField>
+  	<#list primaryColumns as columnField>
   	<#if columnField_has_next>
     ${columnField.column} = ${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"} and
     </#if>
@@ -41,7 +41,7 @@
   
   <!-- 根据条件分页查询 -->
   <select id="find${className}Page" resultMap="BaseResultMap" >
-    select * from ${tableEntity.tableName} where 1 = 1
+    select * from ${tableName} where 1 = 1
     <if test='pd.keyword != null and pd.keyword != ""'>
     	<!-- and 字段 like concat('%', ${r"#{pd.keyword},'%')"} -->
     </if>
@@ -49,16 +49,16 @@
   
   <!-- 根据条件查询全部 -->
   <select id="find${className}" resultMap="BaseResultMap" >
-    select * from ${tableEntity.tableName} where 1 = 1
+    select * from ${tableName} where 1 = 1
     <if test='keyword != null and keyword != ""'>
     </if>
   </select>
   
   <!-- 根据对象主键删除 -->
   <delete id="delete" >
-    delete from ${tableEntity.tableName}
+    delete from ${tableName}
     where
-  	<#list tableEntity.primaries as columnField>
+  	<#list primaryColumns as columnField>
   	<#if columnField_has_next>
     ${columnField.column} = ${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"} and
     </#if>
@@ -70,12 +70,12 @@
   
   <!-- 插入对象全部属性的字段 -->
   <insert id="insert" parameterType="${packageBean}.${className}" >
-    insert into ${tableEntity.tableName} (<include refid="Base_Column_List" />)
+    insert into ${tableName} (<include refid="Base_Column_List" />)
     values( 
-  		<#list tableEntity.primaries as columnField>
+  		<#list primaryColumns as columnField>
     	${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"},
     	</#list>
-  		<#list tableEntity.columnFields as columnField>
+  		<#list normalColumns as columnField>
   		<#if columnField_has_next>
     	${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"},
     	</#if>
@@ -88,9 +88,9 @@
   
   <!-- 根据主键更新对象不为空属性的字段 -->
   <update id="update" parameterType="${packageBean}.${className}" >
-    update ${tableEntity.tableName}
+    update ${tableName}
     <set>
-    	<#list tableEntity.columnFields as columnField>
+    	<#list normalColumns as columnField>
     	<#if columnField_has_next>
       	<if test="${columnField.field} != null" >
         	${columnField.column} = ${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"},
@@ -104,7 +104,7 @@
       	</#list>
     </set>
     where
-  	<#list tableEntity.primaries as columnField>
+  	<#list primaryColumns as columnField>
   	<#if columnField_has_next>
     ${columnField.column} = ${r"#{"}${columnField.field},jdbcType=${columnField.jdbcType}${r"}"} and
     </#if>

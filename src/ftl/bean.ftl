@@ -1,6 +1,6 @@
 package ${packageBean};
 
-${tableEntity.importPackage}
+${importPackage}
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,35 +13,35 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  */
 @JsonInclude(Include.NON_NULL)
 public class ${className} implements Serializable {
-<#list tableEntity.primaries as columnField>	
-	private ${columnField.type} ${columnField.field};
+<#list primaryColumns as columnField>	
+	private ${columnField.javaType} ${columnField.field};
 </#list>	
-<#list tableEntity.columnFields as columnField>
-	<#if columnField.type=='Date'>
+<#list normalColumns as columnField>
+	<#if columnField.javaType=='Date'>
 	<#--@JsonFormat(pattern="yyyy-MM-dd",timezone="GMT+8")-->
 	</#if>
-	private ${columnField.type} ${columnField.field};
+	private ${columnField.javaType} ${columnField.field};
 </#list>
 	
 	public ${className}(){
 	}
 	
-<#list tableEntity.primaries as columnField>
-	public ${columnField.type} get${columnField.fieldUpper}(){
+<#list primaryColumns as columnField>
+	public ${columnField.javaType} get${columnField.fieldUpper}(){
 		return ${columnField.field};
 	}
 	
-	public void set${columnField.fieldUpper}(${columnField.type} ${columnField.field}){
+	public void set${columnField.fieldUpper}(${columnField.javaType} ${columnField.field}){
 		this.${columnField.field} = ${columnField.field};
 	}
 	
 </#list>
-<#list tableEntity.columnFields as columnField>
-	public ${columnField.type} get${columnField.fieldUpper}(){
+<#list normalColumns as columnField>
+	public ${columnField.javaType} get${columnField.fieldUpper}(){
 		return ${columnField.field};
 	}
 	
-	public void set${columnField.fieldUpper}(${columnField.type} ${columnField.field}){
+	public void set${columnField.fieldUpper}(${columnField.javaType} ${columnField.field}){
 		this.${columnField.field} = ${columnField.field};
 	}
 	

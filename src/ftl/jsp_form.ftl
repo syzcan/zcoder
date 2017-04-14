@@ -3,10 +3,10 @@
 <form action="${r"${ctx}"}/${objectName}/${r"${formType=='edit'?'edit':'add'}"}" class="form-x" method="post">
 	<div class="panel">
 		<div class="panel-body">
-			<#list tableEntity.primaries as columnField>
+			<#list primaryColumns as columnField>
 			<input type="hidden" name="${columnField.field}" value="${r"${"}${objectName}.${columnField.field} ${r"}"}" />
 			</#list>
-			<#list tableEntity.columnFields as columnField>
+			<#list normalColumns as columnField>
 			<div class="form-group">
 				<div class="label">
 					<label><#if columnField.remark ?? && columnField.remark!="">${columnField.remark}<#else>${columnField.field}</#if></label>

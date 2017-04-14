@@ -29,7 +29,7 @@ form .form-group:last-child{padding-bottom:0;}
 .admin-panel .table th {border-bottom: 2px solid #0ae;}
 .admin-panel td{line-height:24px;}
 .admin-panel td .button{line-height:16px;}
-.admin-panel .pagination .active{background:#fff;}
+/* .admin-panel .pagination .active{background:#fff;} */
 
 .dialog{min-height: 100%}
 

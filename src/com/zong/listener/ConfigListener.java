@@ -6,7 +6,7 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.log4j.Logger;
 
-import com.zong.util.Config;
+import com.zong.zdb.util.ZDBConfig;
 
 /**
  * @desc tomcat启动时执行初始化数据，加载常量到application
@@ -27,7 +27,7 @@ public class ConfigListener implements ServletContextListener {
 		try {
 			logger.info("======加载config.json");
 			ServletContext application = event.getServletContext();
-			application.setAttribute(Config.CONFIG_DATA, Config.readConfig());
+			application.setAttribute("configData", ZDBConfig.readConfig());
 		} catch (Exception e) {
 			logger.error("加载配置文件失败", e);
 		}
