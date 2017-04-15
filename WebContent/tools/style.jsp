@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="${ctx }/tools/css/jsoneditor.min.css" />
 <link rel="stylesheet" href="${ctx }/tools/css/font-awesome.min.css" />
 <link rel="stylesheet" href="${ctx }/tools/css/style.css" />
+<link rel="shortcut icon" href="${ctx }/static/image/favicon.ico"/>
 <script type="text/javascript">
 	var ctx = "${pageContext.request.contextPath }";
 </script>

@@ -28,7 +28,7 @@
 				className：<input id="className" type="text" class="input input-auto border-main" value="${table.className }">
 				<br><br>
 				<c:forEach items="${templates }" var="template" varStatus="vs">
-				<button type="button" class="button border-blue ${vs.count==1?'active':'' }"
+				<button type="button" class="button ${vs.count==1?'bg-blue':'border-blue' }"
 					data-url="${ctx}/${dbname }/tables/${tableName }/code/${template }.json" data-type="${template.indexOf('Xml')>-1?'xml':(template.indexOf('jsp')>-1?'html':'java') }">${template }</button>
 				</c:forEach>
 				<a href="javascript:;" class="button border-yellow" onclick="beetlCode('${ctx}/${dbname }/tables/${tableName }/beetlCode')">beetlCode</a>
@@ -49,8 +49,8 @@
 	$(function(){
 		$('#buttonList button').click(function(){
 			var pre = '<pre class="brush:'+$(this).attr('data-type')+';toolbar:false;quick-code:false">';
-			$('#buttonList button').removeClass('active');
-			$(this).addClass('active');
+			$('#buttonList button').removeClass('bg-blue').addClass('border-blue');
+			$(this).removeClass('border-blue').addClass('bg-blue');
 			$('textarea').hide();
 			$.ajax({
 				url:$(this).attr('data-url')+'?objectName='+$.trim($('#objectName').val())+'&className='+$.trim($('#className').val())+'&packageName='+$.trim($('#packageName').val()),
@@ -90,10 +90,11 @@
 	}
 	//设置框取消焦点后，当前代码更新
 	$('#buttonList input').blur(function(){
-		$('#buttonList button.active').click();
+		$('#buttonList button.bg-blue').click();
 	});
 	
 	function beetlCode(url){
+		$('#buttonList button').removeClass('bg-blue').addClass('border-blue');
 		$('textarea').show();
 		if($.trim($('textarea').val())==''){
 			$('textarea').focus();
@@ -116,6 +117,11 @@
 			}
 		});
 	}
+	var btl = '';
+	btl += '<'+'%for(column in columnFields){println("");}%'+'>';
+	btl += '<'+'%for(column in primaryColumns){print("");}%'+'>';
+	btl += '<'+'%for(column in normalColumns){print("");}%'+'>';
+	$('textarea').val(btl);
 </script>
 <%-- </c:if> --%>
 </html>

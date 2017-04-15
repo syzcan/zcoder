@@ -12,11 +12,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ include file="/WEB-INF/jsp/common/style.jsp"%>
+<style type="text/css">
+#dataList tr>td:first-child,#dataList tr>th:first-child{border-left: none;}
+#dataList tr>td:last-child,#dataList tr>th:last-child{border-right: none;}
+#dataList th{border-top: none;}
+</style>
 </head>
 <body>
 	<%@ include file="/WEB-INF/jsp/common/nav.jsp"%>
 	<div class="admin">
-		<div class="panel admin-panel" style="overflow-x:scroll">
+		<div class="panel admin-panel">
 		<div class="panel-head">
 			<form action="${ctx}/${dbname}/tables/${tableName }/sqldatas" method="post">
 				数据连接：【<a href="${ctx}/${dbname}/tables">${dbname }</a> > ${tableName }
@@ -28,6 +33,7 @@
 				<input name="sql" value="${sql }" placeholder="sql" type="text" class="input margin-top">
 				</form>
 			</div>
+			<div style="overflow-x:scroll">
 			<table class="table table-hover table-condensed table-bordered" id="dataList">
 				<thead>
 					<tr>
@@ -41,12 +47,11 @@
 					<tr>
 						<td style="padding:0;text-align: center;">${vs.count }</td>
 						<c:forEach items="${rows }" var="row" varStatus="vs">
-							<td style="padding:0;min-width: 80px"><input style="width: 100%;padding:0;border: 0" value="${row.value}"/></td>
+							<td style="padding:0;min-width: 80px"><input style="width: 100%;height:25px;padding:0;border: 0" value="${row.value}"/></td>
 						</c:forEach>
 					</tr>
 				</c:forEach>
 			</table>
-			<div class="panel-foot text-center">
 			</div>
 		</div>
 	</div>

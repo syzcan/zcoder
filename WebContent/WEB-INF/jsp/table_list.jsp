@@ -2,10 +2,11 @@
 	pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<title>月光边境-${dbname }</title>
+<title>zcoder-${dbname }</title>
 <meta name="keywords" content="关键词" />
 <meta name="description" content="描述" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -17,8 +18,8 @@
 	<div class="admin">
 		<div class="panel admin-panel">
 			<div class="panel-head">
-					数据连接：【${dbname }】 表数量： 【${tables.size() }】
-					快速定位：<input name="tableName" placeholder="表名" type="text" class="input input-auto border-main">
+					数据连接：【${dbname }】 表数量： 【${fn:length(tables) }】
+<!-- 					快速定位：<input name="tableName" placeholder="表名" type="text" class="input input-auto border-main"> -->
 			</div>
 			<table class="table table-hover table-condensed">
 				<thead>

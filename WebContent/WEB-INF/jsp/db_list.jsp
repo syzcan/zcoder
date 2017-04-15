@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<title>月光边境</title>
+<title>zcoder数据连接</title>
 <meta name="keywords" content="关键词" />
 <meta name="description" content="描述" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -36,9 +36,14 @@
 						<td>${db['jdbc.url'] }</td>
 						<td>${db['jdbc.username'] }</td>
 						<td>${db['jdbc.password'] }</td>
-						<td><a class="button border-blue button-little"
-							href="javascript:;"
-							onclick="window.open('${ctx}/${db['dbname'] }/tables')">查看</a>
+						<td>
+						<c:if test="${!empty db.dao }">
+						<a class="button border-blue button-little"
+							href="${ctx}/${db['dbname'] }/tables">查看</a>
+							</c:if>
+						<c:if test="${empty db.dao }">
+							<span class="badge bg-red">连接失败</span>
+						</c:if>
 						</td>
 					</tr>
 				</c:forEach>

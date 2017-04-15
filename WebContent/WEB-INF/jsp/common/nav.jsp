@@ -6,19 +6,28 @@
 			<!--描述：LOGO及系统名称-->
 			<div class="navbar-head">
 				<button class="button icon-navicon" data-target="#navbar1"></button>
-				<a href="${ctx }/dbs"> <img src="http://www.pintuer.com/images/30-white.png"> <strong class="text-big hidden-l hidden-s">zcoder</strong></a>
+				<a href="${ctx }/dbs"> <img src="${ctx }/static/image/logo.png"> <strong class="text-big hidden-l hidden-s">zcoder</strong></a>
 			</div>
 			<!--描述：导航-->
 			<div class="navbar-body nav-navicon" id="navbar1">
 				<ul class="nav nav-inline nav-menu">
-					<li><a class="icon-cog" href="javascript:;">导航<span class="arrow"></span></a>
+					<li class="${nav=='config'?'active':'' }"><a class="icon-cog" href="javascript:;"> 设置<span class="arrow"></span></a>
 						<ul class="drop-menu">
-							<li><a class="icon-th-list" href="${ctx }/dbs"> 数据连接</a></li>
+							
 							<li><a href="${ctx}/config/config"><span class="icon-cogs"></span> 数据源</a></li>
 							<li><a class="icon-file" href="${ctx}/templates"> 代码模板</a></li>
-							<li><a class="icon-code" href="${ctx}/code"> 代码高亮</a></li>
 						</ul></li>
-					<li><a class="icon-wrench" href="javascript:;">工具<span class="arrow"></span></a>
+					<li class="${nav=='dbs'?'active':'' }"><a class="icon-database" href="${ctx }/dbs"> 数据连接<span class="arrow"></span></a>
+						<ul class="drop-menu">
+						<c:forEach items="${configData.dbs }" var="db" varStatus="vs">
+						<c:if test="${!empty db.dao }">
+						<li><a href="${ctx}/${db['dbname'] }/tables">${db['dbname'] }</a></li>
+						</c:if>
+						</c:forEach>
+						</ul>
+					</li>	
+					<li class="${nav=='code'?'active':'' }"><a class="icon-code" href="${ctx}/code"> 代码高亮</a></li>
+					<li><a class="icon-wrench" href="javascript:;"> 菜鸟工具<span class="arrow"></span></a>
 						<ul class="drop-menu">
 							<li><a href="${ctx}/tools/html.jsp">HTML格式化</a></li>
 							<li><a href="${ctx}/tools/css.jsp">CSS格式化</a></li>

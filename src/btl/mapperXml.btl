@@ -43,7 +43,7 @@
   <select id="find${className}Page" resultMap="BaseResultMap" >
     select * from ${tableName} where 1 = 1
     <if test='pd.keyword != null and pd.keyword != ""'>
-    	<!-- and 字段 like concat('%', #{pd.keyword},'%') -->
+    	<!-- and 字段 like concat(concat('%', #{pd.keyword}),'%') -->
     </if>
   </select>
   

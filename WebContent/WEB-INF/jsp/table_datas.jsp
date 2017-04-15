@@ -12,11 +12,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ include file="/WEB-INF/jsp/common/style.jsp"%>
+<style type="text/css">
+#dataList tr>td:first-child,#dataList tr>th:first-child{border-left: none;}
+#dataList tr>td:last-child,#dataList tr>th:last-child{border-right: none;}
+#dataList th{border-top: none;}
+</style>
 </head>
 <body>
 	<%@ include file="/WEB-INF/jsp/common/nav.jsp"%>
 	<div class="admin">
-		<div class="panel admin-panel" style="overflow-x:scroll">
+		<div class="panel admin-panel">
 		<div class="panel-head">
 				数据连接：【<a href="${ctx}/${dbname}/tables">${dbname }</a> > ${tableName }
 				<a class="button button-little border-blue" href="${ctx}/${dbname }/tables/${tableName }">结构</a>
@@ -25,11 +30,12 @@
 				<a class="button button-little border-blue" href="${ctx}/${dbname }/tables/${tableName }/sqldatas">查询</a>
 				】
 			</div>
+			<div style="overflow-x:scroll">
 			<table class="table table-hover table-condensed table-bordered" id="dataList">
 				<thead>
 					<tr>
 						<c:forEach items="${columns }" var="column" varStatus="vs">
-							<th data-column="${column.column }">${empty column.remark?column.column:column.remark }</th>
+							<th data-column="${column.column }"${column.key=='PRI'?'class="text-red"':'' }>${empty column.remark?column.column:column.remark }</th>
 						</c:forEach>
 					</tr>
 				</thead>
@@ -48,6 +54,7 @@
 					</tr>
 				</c:forEach>
 			</table>
+			</div>
 		<div class="panel-foot text-center">
 			<form id="pageForm" action="${ctx}/${dbname }/tables/${tableName}/datas">
 				<input type="hidden" name="orderColumn" value="${page.pd.orderColumn}" />
@@ -73,5 +80,6 @@
 		var orderType = '${page.pd.orderType}';
 		$('#dataList th[data-column="'+orderColumn+'"]').append('<span class="icon-sort-'+orderType+' margin-left margin-top text-blue"></span>');
 	});
+	$(".table").resizableColumns();
 </script>
 </html>

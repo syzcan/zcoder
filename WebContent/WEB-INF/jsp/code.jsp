@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<title>代码高亮</title>
+<title>zcoder代码高亮</title>
 <meta name="keywords" content="关键词" />
 <meta name="description" content="描述" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -35,6 +35,7 @@
 				<button type="button" class="button">java</button>
 				<button type="button" class="button">python</button>
 				<button type="button" class="button">xml</button>
+				<button type="button" class="button">html</button>
 				<button type="button" class="button">javascript</button>
 				<button type="button" class="button">css</button>
 				<button type="button" class="button">sql</button>
@@ -43,7 +44,7 @@
 			</div>
 		</div>
 		<div>
-			<textarea style="width: 100%; height: 300px" placeholder="源代码"></textarea>
+			<textarea class="input" style="width: 100%; height: 300px;resize:none" placeholder="源代码"></textarea>
 		</div>
 		<div id="preview"></div>
 	</div>
@@ -55,17 +56,23 @@
 			$('#buttonList button').removeClass('active');
 			$(this).addClass('active');
 			//特殊字符转义
-			data = $('textarea').val();
+			code = $('textarea').val();
 			//格式化
 			if($(this).html()=='java'||$(this).html()=='javascript'){
-				data = js_beautify(data, 1, '\t');
+				code = js_beautify(code, 1, '\t');
 			}
 			if($(this).html()=='xml'){
-				data = $.format(data, {method : 'xml'});
+				code = $.format(code, {method : 'xml'});
+			}
+			if($(this).html()=='html'){
+				code = style_html(code, 1, '\t');
+			}
+			if($(this).html()=='css'){
+				code = CSSPacker['format'](code);
 			}
 			//特殊字符转义
-			data = data.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-			$('#preview').html(pre+data+'</pre>');
+			code = code.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+			$('#preview').html(pre+code+'</pre>');
 			//代码高亮
 			SyntaxHighlighter.highlight();
 		});

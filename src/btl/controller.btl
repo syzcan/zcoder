@@ -2,14 +2,15 @@ package ${packageController};
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.zong.base.controller.BaseController;
+import com.zong.base.BaseController;
 import com.zong.util.BusinessException;
 import com.zong.util.Page;
 import com.zong.util.PageData;
@@ -24,7 +25,7 @@ import ${packageService}.${className}Service;
 @Controller
 @RequestMapping(value = "/${objectName}")
 public class ${className}Controller extends BaseController {
-	private final static Logger logger = Logger.getLogger(${className}Controller.class);
+	private final static Logger logger = LoggerFactory.getLogger(${className}Controller.class);
 
 	@Autowired
 	private ${className}Service ${objectName}Service;
@@ -68,7 +69,7 @@ public class ${className}Controller extends BaseController {
 		try {
 			${objectName}Service.add${className}(${objectName});
 		} catch (BusinessException e) {
-			logger.warn(e.getErrMsg(), e);
+			logger.warn(e.getErrMsg());
 			result.put("errMsg", e.getErrMsg());
 		} catch (Exception e) {
 			logger.error(e.toString(), e);
@@ -87,7 +88,7 @@ public class ${className}Controller extends BaseController {
 		try {
 			${objectName}Service.edit${className}(${objectName});
 		} catch (BusinessException e) {
-			logger.warn(e.getErrMsg(), e);
+			logger.warn(e.getErrMsg());
 			result.put("errMsg", e.getErrMsg());
 		} catch (Exception e) {
 			logger.error(e.toString(), e);
@@ -106,7 +107,7 @@ public class ${className}Controller extends BaseController {
 		try {
 			${objectName}Service.delete${className}(${objectName});
 		} catch (BusinessException e) {
-			logger.warn(e.getErrMsg(), e);
+			logger.warn(e.getErrMsg());
 			result.put("errMsg", e.getErrMsg());
 		} catch (Exception e) {
 			logger.error(e.toString(), e);
@@ -125,7 +126,7 @@ public class ${className}Controller extends BaseController {
 		try {
 			${objectName}Service.delete${className}s(getRequest().getParameterValues("id"));
 		} catch (BusinessException e) {
-			logger.warn(e.getErrMsg(), e);
+			logger.warn(e.getErrMsg());
 			result.put("errMsg", e.getErrMsg());
 		} catch (Exception e) {
 			logger.error(e.toString(), e);

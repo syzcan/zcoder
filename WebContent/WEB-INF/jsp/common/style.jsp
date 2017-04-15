@@ -4,11 +4,14 @@
 <c:set var="ctx" value="${pageContext.request.contextPath }" />
 <link rel="stylesheet" href="${ctx }/static/css/pintuer.css" />
 <link rel="stylesheet" href="${ctx }/static/css/admin.css" />
+<link rel="stylesheet" href="${ctx }/static/css/jquery.resizableColumns.css" />
+<link rel="shortcut icon" href="${ctx }/static/image/favicon.ico"/>
 <script type="text/javascript">
 	var ctx = "${pageContext.request.contextPath }";
 </script>
 <script type="text/javascript" src="${ctx }/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="${ctx }/static/js/pintuer.js"></script>
+<script type="text/javascript" src="${ctx }/static/js/jquery.resizableColumns.min.js"></script>
 <script type="text/javascript" src="${ctx }/plugins/layer/layer.js"></script>
 <link rel="stylesheet" href="${ctx }/plugins/SyntaxHighlighter/shCoreDefault.css">
 <script type="text/javascript" src="${ctx }/plugins/SyntaxHighlighter/shCore.js"></script>

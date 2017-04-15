@@ -1,4 +1,4 @@
-package com.zong.web.dbclient.controller;
+package com.zong.web.zcoder.controller;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ public class DatabaseController {
 
 	@RequestMapping(value = "/dbs")
 	public String dbs(Model model) {
+		model.addAttribute("nav", "dbs");
 		return "db_list";
 	}
 
@@ -39,6 +40,7 @@ public class DatabaseController {
 	public String tables(@PathVariable("dbname") String dbname, Model model) {
 		model.addAttribute("dbname", dbname);
 		model.addAttribute("tables", codeService.showTables(dbname));
+		model.addAttribute("nav", "dbs");
 		return "table_list";
 	}
 
@@ -49,6 +51,7 @@ public class DatabaseController {
 		model.addAttribute("tableName", tableName);
 		model.addAttribute("columns", codeService.showTableColumns(dbname, tableName));
 		model.addAttribute("tab", "design");
+		model.addAttribute("nav", "dbs");
 		return "table_view";
 	}
 
@@ -72,6 +75,7 @@ public class DatabaseController {
 		model.addAttribute("page", page);
 		model.addAttribute("datas", datas);
 		model.addAttribute("tab", "data");
+		model.addAttribute("nav", "dbs");
 		return "table_datas";
 	}
 
@@ -86,6 +90,7 @@ public class DatabaseController {
 			model.addAttribute("datas", datas);
 		}
 		model.addAttribute("tab", "data");
+		model.addAttribute("nav", "dbs");
 		return "sql_datas";
 	}
 
@@ -104,7 +109,12 @@ public class DatabaseController {
 		model.addAttribute("tableName", tableName);
 		model.addAttribute("table", TemplateRoot.createTemplateRoot(codeService.showTable(dbname, tableName)));
 		model.addAttribute("tab", "code");
-		templates(model);
+		model.addAttribute("nav", "dbs");
+		List<String> ftls = new ArrayList<String>();
+		for (File f : FileUtils.listFile(FileUtils.getClassResources() + "ftl/")) {
+			ftls.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
+		}
+		model.addAttribute("templates", ftls);
 		return "table_code";
 	}
 
@@ -160,70 +170,4 @@ public class DatabaseController {
 		}
 	}
 
-	@RequestMapping(value = "/templates")
-	public String templates(Model model) {
-		List<String> ftls = new ArrayList<String>();
-		for (File f : FileUtils.listFile(FileUtils.getClassResources() + "ftl/")) {
-			ftls.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
-		}
-		model.addAttribute("templates", ftls);
-		model.addAttribute("content", template(ftls.get(0)));
-		return "template";
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/templates/{name}", produces = { "application/json;charset=UTF-8" })
-	public String template(@PathVariable("name") String name) {
-		String content = "";
-		try {
-			content = FileUtils.readTxt(FileUtils.getClassResources() + "/ftl/" + name + ".ftl");
-		} catch (Exception e) {
-			e.printStackTrace();
-			content = e.toString();
-		}
-		return content;
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/templates/{name}/edit")
-	public String editTemplate(@PathVariable("name") String name, String content) {
-		try {
-			FileUtils.writeTxt(FileUtils.getClassResources() + "/ftl/" + name + ".ftl", content);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return e.toString();
-		}
-		return "Y";
-	}
-
-	@RequestMapping(value = "/config/{name}")
-	public String config(@PathVariable("name") String name, Model model) {
-		String content = "";
-		try {
-			content = FileUtils.readTxt(FileUtils.getClassResources() + "zdb.json");
-		} catch (Exception e) {
-			e.printStackTrace();
-			content = e.toString();
-		}
-		model.addAttribute("name", name);
-		model.addAttribute("content", content);
-		return "config";
-	}
-
-	@ResponseBody
-	@RequestMapping(value = "/config/{name}/edit")
-	public String editConfig(@PathVariable("name") String name, String content, HttpServletRequest request) {
-		try {
-			request.getServletContext().setAttribute("configData", ZDBConfig.writeConfig(content));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return e.toString();
-		}
-		return "Y";
-	}
-
-	@RequestMapping(value = "/code")
-	public String code() {
-		return "code";
-	}
 }

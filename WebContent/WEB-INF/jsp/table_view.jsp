@@ -2,6 +2,7 @@
 	pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
@@ -15,11 +16,14 @@
 .beanField input{background: white;width: 100%;border: none;}
 .beanField input:hover{background: #f5f5f5}
 table tr:hover .beanField input{background: #f5f5f5}
+#dataList tr>td:first-child,#dataList tr>th:first-child{border-left: none;}
+#dataList tr>td:last-child,#dataList tr>th:last-child{border-right: none;}
+#dataList tr:last-child>td{border-bottom: none;}
 </style>
 </head>
 <body>
 	<%@ include file="/WEB-INF/jsp/common/nav.jsp"%>
-	<div style="position:fixed;top:3px;left:400px;z-index:10;color:white">取值前缀：<input id="prefix" type="text" class="input input-auto border-main"></div>
+	<div style="position:fixed;top:3px;left:600px;z-index:10;color:white">取值前缀：<input id="prefix" placeholder="el表达式bean名称" type="text" class="input input-auto border-main"></div>
 	<div class="admin">
 		<div class="panel admin-panel">
 			<div class="panel-head">
@@ -43,8 +47,8 @@ table tr:hover .beanField input{background: #f5f5f5}
 							<option value="layui">layui</option>
 							</select>
 						</th>
-						<th width="160px">bean取值</th>
-						<th width="160px">字段【${columns.size() }】</th>
+						<th width="160px">EL 取值</th>
+						<th width="160px">字段【${fn:length(columns) }】</th>
 						<th width="100px">jdbcType</th>
 						<th width="80px">java类型</th>
 						<th width="80px">类型</th>
