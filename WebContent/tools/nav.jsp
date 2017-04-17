@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <style>
 .navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover{color:white;background-color: #5cb85c;}
 </style>
@@ -12,14 +13,14 @@
 		</div>
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul id="navbar" class="nav navbar-nav">
-				<li class="${pageContext.request.requestURI.indexOf('tools/html.jsp')>0?'active':''}"><a href="${ctx}/tools/html.jsp">HTML格式化</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/css.jsp')>0?'active':''}"><a href="${ctx}/tools/css.jsp">CSS格式化</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/js.jsp')>0?'active':''}"><a href="${ctx}/tools/js.jsp">JS格式化</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/xml.jsp')>0?'active':''}"><a href="${ctx}/tools/xml.jsp">XML格式化</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/json.jsp')>0?'active':''}"><a href="${ctx}/tools/json.jsp">JSON格式化</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/xml2json.jsp')>0?'active':''}"><a href="${ctx}/tools/xml2json.jsp">XML转换JSON</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/md5.jsp')>0?'active':''}"><a href="${ctx}/tools/md5.jsp">MD5加密</a></li>
-				<li class="${pageContext.request.requestURI.indexOf('tools/rgb.jsp')>0?'active':''}"><a href="${ctx}/tools/rgb.jsp">RGB转16进制</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/html.jsp')>0?'active':''}"><a href="${ctx}/tools/html.jsp">HTML格式化</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/css.jsp')>0?'active':''}"><a href="${ctx}/tools/css.jsp">CSS格式化</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/js.jsp')>0?'active':''}"><a href="${ctx}/tools/js.jsp">JS格式化</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/xml.jsp')>0?'active':''}"><a href="${ctx}/tools/xml.jsp">XML格式化</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/json.jsp')>0?'active':''}"><a href="${ctx}/tools/json.jsp">JSON格式化</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/xml2json.jsp')>0?'active':''}"><a href="${ctx}/tools/xml2json.jsp">XML转换JSON</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/md5.jsp')>0?'active':''}"><a href="${ctx}/tools/md5.jsp">MD5加密</a></li>
+				<li class="${fn:indexOf(pageContext.request.requestURI,'tools/rgb.jsp')>0?'active':''}"><a href="${ctx}/tools/rgb.jsp">RGB转16进制</a></li>
 			</ul>
 		</div>
 	</div>
