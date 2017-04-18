@@ -10,6 +10,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ include file="/tools/style.jsp"%>
+<script type="text/javascript" src="${ctx }/tools/js/foldcode.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/foldgutter.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/brace-fold.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/xml-fold.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/indent-fold.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/markdown-fold.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/comment-fold.js"></script>
 <style>
 .CodeMirror {
   font-family: monospace;
@@ -63,6 +70,8 @@
 					mode : "application/xml",
 					indentUnit : 4,
 					indentWithTabs : true,
+					foldGutter: true,
+				    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 				});
 
 		$("#submitBTN").click(function() {
