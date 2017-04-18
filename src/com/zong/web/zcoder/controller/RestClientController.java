@@ -21,6 +21,8 @@ import com.zong.zdb.util.PageData;
 @RequestMapping("/restclient")
 public class RestClientController {
 	private Logger logger = Logger.getLogger(RestClientController.class);
+	// 模拟浏览器访问
+	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31";
 
 	@RequestMapping
 	public String restclient(Model model) {
@@ -33,7 +35,8 @@ public class RestClientController {
 	public PageData request(String url, String type) {
 		PageData result = new PageData("errMsg", "success");
 		try {
-			Response response = Jsoup.connect(url).method(Method.valueOf(type)).ignoreContentType(true).execute();
+			Response response = Jsoup.connect(url).userAgent(USER_AGENT).method(Method.valueOf(type))
+					.ignoreContentType(true).execute();
 			PageData data = new PageData();
 			data.put("body", response.body());
 			data.put("cookies", response.cookies());
