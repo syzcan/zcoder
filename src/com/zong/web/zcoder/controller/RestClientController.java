@@ -5,6 +5,7 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,7 +23,8 @@ public class RestClientController {
 	private Logger logger = Logger.getLogger(RestClientController.class);
 
 	@RequestMapping
-	public String restclient() {
+	public String restclient(Model model) {
+		model.addAttribute("nav", "rest");
 		return "/restclient";
 	}
 
