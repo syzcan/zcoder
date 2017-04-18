@@ -39,12 +39,12 @@
 }
 
 div.jsoneditor-menu {
-	background-color: #96b97d;
-	border: 1px solid #96b97d;
+	background-color: #0ae;
+	border: 1px solid #0ae;
 }
 
 div.jsoneditor {
-	border: 1px solid #96b97d;
+	border: 1px solid #0ae;
 }
 
 .CodeMirror {
@@ -67,8 +67,8 @@ div.jsoneditor {
 				<option value="DELETE">DELETE</option>
 			</select>
 			<input id="url" type="text" value="http://localhost:8080/zcoder/zbase/tables/sys_user/data.json" style="margin-left: -5px;border-radius:0;" size="80" class="input input-auto border-main" placeholder="Enter Request URL"/> 
-			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
-			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" />
+			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
+			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" />
 			<div class="padding-small">
 			<table class="table table-condensed" id="pathParam" style="display: none">
 				<tr>
@@ -168,13 +168,13 @@ function sendRequest() {
             var cookies = response.cookies;
             var headers = response.headers;
             var body = response.body;
-            if (headers['Content-Type'] == 'application/json;charset=UTF-8') {
+            if (headers['Content-Type'].indexOf('application/json')>-1) {
                 body = JSON.stringify($.parseJSON(body), null, 2);
                 jsonEditor.setText(body);
                 $('a[href="#tab-Body"]').click();
                 $('#jsonEditor').show();
                 $('.CodeMirror').hide();
-            } else if (headers['Content-Type'] == 'application/xml;charset=UTF-8') {
+            } else if (headers['Content-Type'].indexOf('application/xml')>-1) {
                 body = $.format(body, {
                     method: 'xml'
                 });
