@@ -50,6 +50,9 @@ div.jsoneditor {
 .CodeMirror {
 	border: 1px solid #ddd;
 	font-family: monospace;
+	height: 200px
+}
+#response .CodeMirror {
 	height: 400px;
 }
 .table td{border:none}
@@ -60,13 +63,13 @@ div.jsoneditor {
 	<div class="margin">
 		<div class="border">
 		<div class="padding bg">
-			<select class="input input-auto border-main" id="type" style="border-top-right-radius:0;border-bottom-right-radius:0">
+			<select class="input input-auto border-main" id="method" style="border-top-right-radius:0;border-bottom-right-radius:0">
 				<option value="GET">GET</option>
 				<option value="POST">POST</option>
 				<option value="PUT">PUT</option>
 				<option value="DELETE">DELETE</option>
 			</select>
-			<input id="url" type="text" value="http://localhost:8080/zcoder/zbase/tables/sys_user/data.json" style="margin-left: -5px;border-radius:0;" size="80" class="input input-auto border-main" placeholder="Enter Request URL"/> 
+			<input id="url" type="text" value="" style="margin-left: -5px;border-radius:0;" size="80" class="input input-auto border-main" placeholder="Enter Request URL"/> 
 			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
 			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" />
 			<div class="padding-small">
@@ -97,22 +100,40 @@ div.jsoneditor {
 					</table>
 				</div>
 				<div class="tab-panel padding" id="tab-body" style="margin-top: -10px">
-					<input class="margin-left" type="radio" name="bodyType" value="form-data" checked="checked" />form-data
-					<input class="margin-left" type="radio" name="bodyType" value="x-www-form-urlencoded" />x-www-form-urlencoded
-					<input class="margin-left" type="radio" name="bodyType" value="raw" />raw
-					<input class="margin-left" type="radio" name="bodyType" value="binary" />binary
-					<table class="table table-condensed" id="bodyParam">
+					<input class="margin-left" type="radio" name="bodyType" value="form-data" checked="checked" /> form-data
+					<input class="margin-left" type="radio" name="bodyType" value="x-www-form-urlencoded" /> x-www-form-urlencoded
+					<input class="margin-left" type="radio" name="bodyType" value="raw" /> raw 
+					<select id="rawType" style="display: none">
+						<option value="text/plain;charset=UTF-8">text/plain</option>
+						<option value="application/json;charset=UTF-8">application/json</option>
+						<option value="application/xml;charset=UTF-8">application/xml</option>
+					</select>
+					<div id="form-data" style="margin-top: 10px">
+					<table class="table table-condensed">
 						<tr>
 							<td><input type="text" placeholder="key" class="input auto" /></td>
 							<td><input type="text" placeholder="value" class="input auto" /></td>
-							<td><a href="javascript:;" onclick="addBodyParam()" class="icon-plus-circle text-green text-big"></a></td>
+							<td><a href="javascript:;" onclick="addBodyParam('form-data')" class="icon-plus-circle text-green text-big"></a></td>
 						</tr>
 					</table>
+					</div>
+					<div id="x-www-form-urlencoded" style="margin-top: 10px;display: none;">
+					<table class="table table-condensed">
+						<tr>
+							<td><input type="text" placeholder="key" class="input auto" /></td>
+							<td><input type="text" placeholder="value" class="input auto" /></td>
+							<td><a href="javascript:;" onclick="addBodyParam('x-www-form-urlencoded')" class="icon-plus-circle text-green text-big"></a></td>
+						</tr>
+					</table>
+					</div>
+					<div id="raw" style="margin-top: 10px;display: none;">
+						<textarea id="rawEditor" style="width: 100%;height: 200px;resize:none"></textarea>
+					</div>
 				</div>
 			</div>
 		</div>
 		</div>
-		<div class="border margin-top">
+		<div class="border margin-top" id="response">
 				<div class="tab">
 					<div class="tab-head bg padding-top">
 						<ul class="tab-nav">
@@ -141,79 +162,125 @@ var jsonEditor = new JSONEditor($('#jsonEditor')[0], {
     mode: 'code'
 });
 jsonEditor.setText('');
-var xmlEditor = CodeMirror.fromTextArea($('#xmlEditor')[0], {
-    lineNumbers: true,
-    matchBrackets: true,
-    mode: "application/xml",
-    indentUnit: 4,
-    indentWithTabs: true,
-    foldGutter: true,
-    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-});
+var xmlEditor = getCodeEditor('xmlEditor','XML');
+var rawEditor;
+function getCodeEditor(id,type){
+	var mode = '';
+	if(type=='XML'){
+		mode = 'application/xml';
+	}
+	return CodeMirror.fromTextArea($('#'+id)[0], {
+	    lineNumbers: true,
+	    matchBrackets: true,
+	    mode: mode,
+	    indentUnit: 4,
+	    indentWithTabs: true,
+	    foldGutter: true,
+	    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+	}); 
+}
 //发送请求
 function sendRequest() {
-    var type = $('#type').val();
+    var method = $('#method').val();
     var url = $('#url').val();
+    var bodyType = $('input[name="bodyType"]:checked').val();
     var reg = /^[a-zA-z]+:\/\/[^\s]*$/;
     if (!reg.test(url)) {
         layer.msg('请求地址格式错误');
         return;
     }
     var data = {};
-    data.type = type;
+    var headers = {};
+    var params = {};
+    data.method = method;
     data.url = url;
-    $.post('${ctx}/restclient/request.json', data).done(function(data) {
-        if (data.errMsg == 'success') {
-            var response = data.data;
-            var cookies = response.cookies;
-            var headers = response.headers;
-            var body = response.body;
-            if (headers['Content-Type'].indexOf('application/json')>-1) {
-                body = JSON.stringify($.parseJSON(body), null, 2);
-                jsonEditor.setText(body);
-                $('a[href="#tab-Body"]').click();
-                $('#jsonEditor').show();
-                $('.CodeMirror').hide();
-            } else if (headers['Content-Type'].indexOf('application/xml')>-1) {
-                body = $.format(body, {
-                    method: 'xml'
-                });
-                xmlEditor.setValue(body);
-                $('a[href="#tab-Body"]').click();
-                $('.CodeMirror').show();
-                $('#jsonEditor').hide();
-                xmlEditor.setCursor(0);
-            } else{
-                xmlEditor.setValue(body);
-                $('a[href="#tab-Body"]').click();
-                $('.CodeMirror').show();
-                $('#jsonEditor').hide();
-                xmlEditor.setCursor(0);
-            }
-            $('#tab-Cookies').html('No cookies were returned by the server');
-            $('#tab-Headers').html('');
-            for (key in cookies) {
-                $('#tab-Cookies').append('<p><strong>' + key + ':</strong> ' + cookies[key] + '</p>');
-            }
-            for (key in headers) {
-                $('#tab-Headers').append('<p><strong>' + key + ':</strong> ' + headers[key] + '</p>');
-            }
-        } else {
-            layer.msg(data.errMsg);
-        }
+    $('#headerParam tr').each(function(){
+    	var key = $.trim($(this).find('input[placeholder="key"]').val());
+		var value = $.trim($(this).find('input[placeholder="value"]').val());
+		if(key!=''){
+			headers[key] = value;
+		}
+    });
+    if(bodyType=='raw'){
+    	var rawType = $('#rawType').val();
+    	headers['Content-Type'] = rawType;
+    	params['payload'] = rawEditor.getValue();
+    }else{
+    	headers['Content-Type'] = bodyType;
+    	$('#'+bodyType).find('tr').each(function(){
+    		var key = $.trim($(this).find('input[placeholder="key"]').val());
+    		var value = $.trim($(this).find('input[placeholder="value"]').val());
+    		if(key!=''){
+    			params[key] = value;
+    		}
+    	});
+    }
+    data.headers = headers;
+    data.params = params;
+    $.ajax({
+		url : '${ctx}/restclient/request.json',
+		contentType : 'application/json',
+		type : 'POST',
+		dataType : 'json',
+		data : JSON.stringify(data),
+		success : function(data) {
+	        if (data.errMsg == 'success') {
+	            var response = data.data;
+	            var cookies = response.cookies;
+	            var headers = response.headers;
+	            var body = response.body;
+	            if (headers['Content-Type'].indexOf('application/json')>-1) {
+	                body = JSON.stringify($.parseJSON(body), null, 2);
+	                jsonEditor.setText(body);
+	                $('a[href="#tab-Body"]').click();
+	                $('#jsonEditor').show();
+	                $('#response .CodeMirror').hide();
+	            } else if (headers['Content-Type'].indexOf('application/xml')>-1) {
+	                body = $.format(body, {
+	                    method: 'xml'
+	                });
+	                xmlEditor.setValue(body);
+	                $('a[href="#tab-Body"]').click();
+	                $('#response .CodeMirror').show();
+	                $('#jsonEditor').hide();
+	                xmlEditor.setCursor(0);
+	            } else{
+	                xmlEditor.setValue(body);
+	                $('a[href="#tab-Body"]').click();
+	                $('#response .CodeMirror').show();
+	                $('#jsonEditor').hide();
+	                xmlEditor.setCursor(0);
+	            }
+	            $('#tab-Cookies').html('No cookies were returned by the server');
+	            $('#tab-Headers').html('');
+	            for (key in cookies) {
+	                $('#tab-Cookies').append('<p><strong>' + key + ':</strong> ' + cookies[key] + '</p>');
+	            }
+	            for (key in headers) {
+	                $('#tab-Headers').append('<p><strong>' + key + ':</strong> ' + headers[key] + '</p>');
+	            }
+	        } else {
+	            layer.msg(data.errMsg);
+	        }
+		}   
     });
 }
 function addPathParam() {
     addParam('pathParam');
+    $('#pathParam a.icon-minus-circle').click(function(){
+    	$(this).parent().parent().remove();
+	    updatePathParam();
+    });
 }
 function addHeaderParam() {
     addParam('headerParam');
 }
-function addBodyParam() {
-    addParam('bodyParam');
+function addBodyParam(id) {
+    //addParam('bodyParam');
+    addParam(id);
 }
 function addParam(id) {
-    var $tr = $('#' + id).children().first().clone();
+    var $tr = $('#' + id).children().first().clone(true);
     $tr.find('a').attr('onclick', '').click(function() {
         $(this).parent().parent().remove();
     }).attr('class', 'icon-minus-circle text-red text-big');
@@ -226,6 +293,66 @@ function showPathParam(obj){
 	}else{
 		$('#pathParam').show();
 	}
+}
+function updatePathParam(){
+	var url = $('#url').val().split('\?')[0];
+	var query = '';
+	$('#pathParam tr').each(function(){
+		var key = $.trim($(this).find('input[placeholder="key"]').val());
+		var value = $.trim($(this).find('input[placeholder="value"]').val());
+		if(key!=''){
+			query += key+'='+value+"&";
+		}
+	});
+	if(query!=''){
+		url += '?'+query.substring(0,query.length-1);
+	}
+	$('#url').val(url);
+}
+//地址参数自动更新
+$(function(){
+	$('#pathParam input[placeholder="key"],#pathParam input[placeholder="value"]').keyup(function(){
+		updatePathParam();
+	});
+	$('#url').keyup(function(){
+		var url = $('#url').val();
+		$('#pathParam input').val('');
+		$.each(getQueryString(url),function(i,n){
+			$('#pathParam tr').eq(i).find('input[placeholder="key"]').val(n.split('=')[0]);
+			$('#pathParam tr').eq(i).find('input[placeholder="value"]').val(n.split('=')[1]);
+		});
+		$('#pathParam tr').each(function(){
+			var key = $.trim($(this).find('input[placeholder="key"]').val());
+			if(key=='' && $(this).find('a').hasClass('icon-minus-circle')){
+				$(this).remove();
+			}
+		});
+		$('#pathParam a.icon-minus-circle')
+	});
+	//切换bodyParam
+	$('input[name="bodyType"]').click(function(){
+		$('#tab-body>div').hide();
+		$('#'+$(this).val()).show();
+		if($(this).val()=='raw'){
+			if(rawEditor==undefined){
+				rawEditor = getCodeEditor('rawEditor','Text');
+			}
+			$('#rawType').show();
+		}else{
+			$('#rawType').hide();
+		}
+	});
+});
+//获取QueryString的数组
+function getQueryString(url){
+     var result = url.match(new RegExp("[\?\&][^\?\&]+=[^\?\&]+","g")); 
+     if(result == null){
+         return "";
+     }
+     for(var i = 0; i < result.length; i++){
+         result[i] = result[i].substring(1);
+     }
+     return result;
 }
 </script>
 </html>
