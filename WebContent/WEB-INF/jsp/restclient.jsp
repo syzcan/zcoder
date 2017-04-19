@@ -34,28 +34,43 @@
 <script type="text/javascript" src="${ctx }/tools/js/markdown-fold.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/comment-fold.js"></script>
 <style type="text/css">
-.jsoneditor-poweredBy {
-	display: none;
-}
-
+body{font-size: 13px}
 div.jsoneditor-menu {
 	background-color: #0ae;
 	border: 1px solid #0ae;
+	display: none;
 }
 
 div.jsoneditor {
-	border: 1px solid #0ae;
+	border: 1px solid #ddd;
+}
+div.ace-jsoneditor .ace_gutter{
+	background: #f7f7f7;
+	color: #999;
+}
+div.jsoneditor-outer{
+	margin-top: 0;
+	padding-top: 0;
+}
+.ace_gutter-layer{
+	border-right: 1px solid #ddd;
 }
 
 .CodeMirror {
 	border: 1px solid #ddd;
-	font-family: monospace;
-	height: 200px
+	height: 200px;
+	font-family: droid sans mono, consolas, monospace, courier new, courier, sans-serif;
+	font-size: 13px;
+	line-height: 1.3;
 }
 #response .CodeMirror {
 	height: 400px;
 }
+.CodeMirror-foldgutter{
+	width: 11px;
+}
 .table td{border:none}
+.icon-arrow-circle-up{display: none}
 </style>
 </head>
 <body>
@@ -69,7 +84,7 @@ div.jsoneditor {
 				<option value="PUT">PUT</option>
 				<option value="DELETE">DELETE</option>
 			</select>
-			<input id="url" type="text" value="" style="margin-left: -5px;border-radius:0;" size="80" class="input input-auto border-main" placeholder="Enter Request URL"/> 
+			<input id="url" type="text" value="" style="margin-left: -5px;border-radius:0;width: 60%" class="input input-auto border-main" placeholder="Enter Request URL"/> 
 			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
 			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" />
 			<div class="padding-small">
@@ -86,7 +101,7 @@ div.jsoneditor {
 			<div class="tab-head bg">
 				<ul class="tab-nav">
 					<li class="active"><a href="#tab-header">Headers</a></li>
-					<li><a href="#tab-body">body</a></li>
+					<li><a href="#tab-body" style="display: none;">body</a></li>
 				</ul>
 			</div>
 			<div class="tab-body">
@@ -104,9 +119,9 @@ div.jsoneditor {
 					<input class="margin-left" type="radio" name="bodyType" value="x-www-form-urlencoded" /> x-www-form-urlencoded
 					<input class="margin-left" type="radio" name="bodyType" value="raw" /> raw 
 					<select id="rawType" style="display: none">
-						<option value="text/plain;charset=UTF-8">text/plain</option>
 						<option value="application/json;charset=UTF-8">application/json</option>
 						<option value="application/xml;charset=UTF-8">application/xml</option>
+						<option value="text/plain;charset=UTF-8">text/plain</option>
 					</select>
 					<div id="form-data" style="margin-top: 10px">
 					<table class="table table-condensed">
@@ -133,7 +148,8 @@ div.jsoneditor {
 			</div>
 		</div>
 		</div>
-		<div class="border margin-top" id="response">
+		<div class="border margin-top" id="response" style="position: relative;">
+				<div id="statusMsg" style="position: absolute;right: 20px;top:18px;display: none">Status: <span class="text-blue margin-right"></span> Time: <span class="text-blue"></span></div>
 				<div class="tab">
 					<div class="tab-head bg padding-top">
 						<ul class="tab-nav">
@@ -148,9 +164,9 @@ div.jsoneditor {
 							<div id="jsonEditor" style="width: 100%;height: 400px;display: none"></div>
 							<textarea id="xmlEditor" style="width: 100%;height: 400px;resize:none"></textarea>
 						</div>
-						<div class="tab-panel" id="tab-Cookies" style="height: 400px;">
+						<div class="tab-panel" id="tab-Cookies" style="height: 400px;margin-left: 5px">
 						</div>
-						<div class="tab-panel" id="tab-Headers" style="height: 400px;overflow-y: scroll;">
+						<div class="tab-panel" id="tab-Headers" style="height: 400px;margin-left: 5px;overflow-y: scroll;">
 						</div>
 					</div>
 				</div>
@@ -182,7 +198,7 @@ function getCodeEditor(id,type){
 //发送请求
 function sendRequest() {
     var method = $('#method').val();
-    var url = $('#url').val();
+    var url = $.trim($('#url').val());
     var bodyType = $('input[name="bodyType"]:checked').val();
     var reg = /^[a-zA-z]+:\/\/[^\s]*$/;
     if (!reg.test(url)) {
@@ -217,6 +233,8 @@ function sendRequest() {
     }
     data.headers = headers;
     data.params = params;
+    layer.load(1);
+    var startTime = new Date();
     $.ajax({
 		url : '${ctx}/restclient/request.json',
 		contentType : 'application/json',
@@ -251,17 +269,44 @@ function sendRequest() {
 	                $('#jsonEditor').hide();
 	                xmlEditor.setCursor(0);
 	            }
-	            $('#tab-Cookies').html('No cookies were returned by the server');
+	            $('#tab-Cookies').html('');
 	            $('#tab-Headers').html('');
+	            var cookieCount = 0;
+	            var headerCount = 0;
 	            for (key in cookies) {
 	                $('#tab-Cookies').append('<p><strong>' + key + ':</strong> ' + cookies[key] + '</p>');
+	                cookieCount++;
 	            }
 	            for (key in headers) {
 	                $('#tab-Headers').append('<p><strong>' + key + ':</strong> ' + headers[key] + '</p>');
+	                headerCount++;
 	            }
+	            if($('#tab-Cookies').html()==''){
+	            	$('#tab-Cookies').html('No cookies were returned by the server');
+	            }
+	            if(cookieCount>0){
+	            	$('a[href="#tab-Cookies"]').html('Cookies <span class="text-blue">('+cookieCount+')</span>');
+	            }else{
+	            	$('a[href="#tab-Cookies"]').html('Cookies');
+	            }
+	            if(headerCount>0){
+	            	$('a[href="#tab-Headers"]').html('Headers <span class="text-blue">('+headerCount+')</span>');
+	            }else{
+	            	$('a[href="#tab-Headers"]').html('Headers');
+	            }
+	            var time = new Date().getTime()-startTime.getTime();
+	            $('#statusMsg').show();
+	            $('#statusMsg').find('span:eq(0)').html(response.statusCode+' '+response.statusText);
+	            $('#statusMsg').find('span:eq(1)').html(time+' ms');
 	        } else {
-	            layer.msg(data.errMsg);
+	            //layer.msg(data.errMsg);
+	            xmlEditor.setValue(data.errMsg);
+                $('a[href="#tab-Body"]').click();
+                $('#response .CodeMirror').show();
+                $('#jsonEditor').hide();
+                xmlEditor.setCursor(0);
 	        }
+	        layer.closeAll();
 		}   
     });
 }
@@ -328,6 +373,15 @@ $(function(){
 			}
 		});
 		$('#pathParam a.icon-minus-circle')
+	});
+	//选择请求方法,GET不显示body参数框
+	$('#method').change(function(){
+		if($(this).val()=='GET'){
+			$('a[href="#tab-header"]').click();
+			$('a[href="#tab-body"]').hide();
+		}else{
+			$('a[href="#tab-body"]').show();
+		}
 	});
 	//切换bodyParam
 	$('input[name="bodyType"]').click(function(){
