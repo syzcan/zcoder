@@ -33,6 +33,9 @@
 <script type="text/javascript" src="${ctx }/tools/js/indent-fold.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/markdown-fold.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/comment-fold.js"></script>
+
+<link rel="stylesheet" href="${ctx }/plugins/webuploader/webuploader.css" />
+<script type="text/javascript" src="${ctx }/plugins/webuploader/webuploader.min.js"></script>
 <style type="text/css">
 body{font-size: 13px}
 div.jsoneditor-menu {
@@ -88,12 +91,14 @@ div.jsoneditor-outer{
 			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
 			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" />
 			<div class="padding-small">
-			<table class="table table-condensed" id="pathParam" style="display: none">
-				<tr>
-					<td><input type="text" placeholder="key" class="input auto" /></td>
-					<td><input type="text" placeholder="value" class="input auto" /></td>
-					<td><a href="javascript:;" onclick="addPathParam()" class="icon-plus-circle text-green text-big"></a></td>
-				</tr>
+			<table class="table table-condensed" style="display: none">
+				<tbody id="pathParam">
+					<tr>
+						<td><input type="text" placeholder="key" class="input auto" /></td>
+						<td><input type="text" placeholder="value" class="input auto" /></td>
+						<td><a href="javascript:;" onclick="addPathParam()" class="icon-plus-circle text-green text-big"></a></td>
+					</tr>
+				</tbody>
 			</table>
 			</div>
 		</div>
@@ -106,12 +111,14 @@ div.jsoneditor-outer{
 			</div>
 			<div class="tab-body">
 				<div class="tab-panel padding active" id="tab-header" style="margin-top: -10px">
-					<table class="table table-condensed" id="headerParam">
-						<tr>
-							<td><input type="text" placeholder="key" class="input auto" /></td>
-							<td><input type="text" placeholder="value" class="input auto" /></td>
-							<td><a href="javascript:;" onclick="addHeaderParam()" class="icon-plus-circle text-green text-big"></a></td>
-						</tr>
+					<table class="table table-condensed">
+						<tbody id="headerParam">
+							<tr>
+								<td><input type="text" placeholder="key" class="input auto" /></td>
+								<td><input type="text" placeholder="value" class="input auto" /></td>
+								<td><a href="javascript:;" onclick="addHeaderParam()" class="icon-plus-circle text-green text-big"></a></td>
+							</tr>
+						</tbody>
 					</table>
 				</div>
 				<div class="tab-panel padding" id="tab-body" style="margin-top: -10px">
@@ -123,22 +130,35 @@ div.jsoneditor-outer{
 						<option value="application/xml;charset=UTF-8">application/xml</option>
 						<option value="text/plain;charset=UTF-8">text/plain</option>
 					</select>
-					<div id="form-data" style="margin-top: 10px">
+					<div style="margin-top: 10px">
 					<table class="table table-condensed">
-						<tr>
-							<td><input type="text" placeholder="key" class="input auto" /></td>
-							<td><input type="text" placeholder="value" class="input auto" /></td>
-							<td><a href="javascript:;" onclick="addBodyParam('form-data')" class="icon-plus-circle text-green text-big"></a></td>
-						</tr>
+						<tbody id="form-data">
+							<tr>
+								<td><input type="text" placeholder="key" class="input auto" /></td>
+								<td>
+								<input type="text" placeholder="value" class="input auto" />
+								<div class="filePicker" id="filePicker" style="display: none;">选择文件</div>
+								</td>
+								<td width="50px">
+									<select class="input input-auto fieldType">
+										<option value="text">text</option>
+										<option value="file">file</option>
+									</select>
+								</td>
+								<td width="50px"><a href="javascript:;" onclick="addBodyParam('form-data')" class="icon-plus-circle text-green text-big"></a></td>
+							</tr>
+						</tbody>
 					</table>
 					</div>
-					<div id="x-www-form-urlencoded" style="margin-top: 10px;display: none;">
+					<div style="margin-top: 10px;display: none;">
 					<table class="table table-condensed">
-						<tr>
-							<td><input type="text" placeholder="key" class="input auto" /></td>
-							<td><input type="text" placeholder="value" class="input auto" /></td>
-							<td><a href="javascript:;" onclick="addBodyParam('x-www-form-urlencoded')" class="icon-plus-circle text-green text-big"></a></td>
-						</tr>
+						<tbody id="x-www-form-urlencoded">
+							<tr>
+								<td><input type="text" placeholder="key" class="input auto" /></td>
+								<td><input type="text" placeholder="value" class="input auto" /></td>
+								<td><a href="javascript:;" onclick="addBodyParam('x-www-form-urlencoded')" class="icon-plus-circle text-green text-big"></a></td>
+							</tr>
+						</tbody>
 					</table>
 					</div>
 					<div id="raw" style="margin-top: 10px;display: none;">
@@ -323,6 +343,12 @@ function addHeaderParam() {
 function addBodyParam(id) {
     //addParam('bodyParam');
     addParam(id);
+    if(id=='form-data'){
+    	$('#form-data tr').last().find('select').val('text').change();
+    	var filePickerId = 'filePicker'+new Date().getTime();
+    	$('#form-data tr').last().find('.filePicker').attr('id',filePickerId).html('选择文件');
+    	createWebUploader(filePickerId);
+    }
 }
 function addParam(id) {
     var $tr = $('#' + id).children().first().clone(true);
@@ -333,10 +359,10 @@ function addParam(id) {
     $('#' + id).append($tr);
 }
 function showPathParam(obj){
-	if($('#pathParam').css('display')!='none'){
-		$('#pathParam').hide();
+	if($('#pathParam').parent().css('display')!='none'){
+		$('#pathParam').parent().hide();
 	}else{
-		$('#pathParam').show();
+		$('#pathParam').parent().show();
 	}
 }
 function updatePathParam(){
@@ -396,6 +422,18 @@ $(function(){
 			$('#rawType').hide();
 		}
 	});
+	//下拉框切换fieldType
+	$('.fieldType').change(function(){
+		if($(this).val()=='file'){
+			$(this).parent().prev().find('input').hide();
+			$(this).parent().prev().find('div').show();
+		}else{
+			$(this).parent().prev().find('input').show();
+			$(this).parent().prev().find('div').hide();
+		}
+	});
+	// 第一栏上传控件
+	createWebUploader('filePicker');
 });
 //获取QueryString的数组
 function getQueryString(url){
@@ -407,6 +445,40 @@ function getQueryString(url){
          result[i] = result[i].substring(1);
      }
      return result;
+}
+function createWebUploader(id){
+	var uploader = WebUploader.create({
+		auto : true,
+		swf : '${ctx }/plugins/webuploader/Uploader.swf',
+		server : '${ctx }/restclient/uploadFile.json',
+		pick : {id:'#'+id,multiple:false},
+		accept : {
+			title : 'Images',
+			extensions : 'gif,jpg,jpeg,bmp,png',
+			//直接用image/*在chrome下出现迟钝
+			mimeTypes : 'image/gif,image/jpg,image/jpeg,image/bmp,image/png'
+		}
+	});
+	// 上传开始弹出加载层
+	uploader.on('uploadStart', function(file) {
+		layer.load(1);
+	});
+	// 文件上传过程中创建进度条实时显示。
+	uploader.on('uploadProgress', function(file, percentage) {
+		var progress = '<div style="padding-top: 40px;text-align:center">'+parseInt(percentage*100)+'%</div>';
+		$('.layui-layer[type="loading"] .layui-layer-content').html(progress);
+	});
+	// 文件上传成功
+    uploader.on( 'uploadSuccess', function(file,data) {
+    	layer.closeAll();
+        console.log(file);
+        console.log(data);
+        $('#'+id).siblings('input').val(data.fileName+";"+data.url);
+	});
+	uploader.on('uploadError', function(file,reason) {
+		layer.closeAll();
+		layer.msg('上传失败:'+reason);
+	});
 }
 </script>
 </html>

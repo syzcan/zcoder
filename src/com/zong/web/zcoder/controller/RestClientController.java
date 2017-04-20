@@ -1,6 +1,13 @@
 package com.zong.web.zcoder.controller;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -9,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
@@ -61,6 +69,7 @@ public class RestClientController {
 			} else {
 				if (contentType.equals("form-data")) {
 					response = Unirest.post(url).headers(headers).fields(params).asString();
+					// 上传文件
 				} else if (contentType.equals("x-www-form-urlencoded")) {
 					if (method.equals("POST")) {
 						response = Unirest.post(url).headers(headers).fields(params).asString();
@@ -104,5 +113,47 @@ public class RestClientController {
 			result.put("errMsg", e.getMessage());
 		}
 		return result;
+	}
+
+	/**
+	 * 上传附件
+	 * 
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
+	public Map<String, String> uploadFile(MultipartFile file, HttpServletRequest request) {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("fileName", file.getOriginalFilename());
+		map.put("url", this.upload(file, request));
+		return map;
+	}
+
+	/**
+	 * 
+	 * @param file
+	 * @param uploadPath 文件保存位置
+	 * @return 返回附件访问路径
+	 */
+	private String upload(MultipartFile file, HttpServletRequest request) {
+		// 文件目录按时间归类文件夹
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		String dateDir = dateFormat.format(new Date());
+		String path = "upload/" + dateDir;
+		Random random = new Random();
+		String extName = "";
+		if (file.getOriginalFilename().lastIndexOf(".") >= 0) {
+			extName = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+		}
+		path += "/" + random.nextInt(10000) + System.currentTimeMillis() + extName;
+		File f = new File(request.getSession().getServletContext().getRealPath("/" + path));
+		if (!f.getParentFile().exists()) {
+			f.getParentFile().mkdirs();
+		}
+		try {
+			file.transferTo(f);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return path;
 	}
 }
