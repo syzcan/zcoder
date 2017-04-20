@@ -246,8 +246,9 @@ function sendRequest() {
     	$('#'+bodyType).find('tr').each(function(){
     		var key = $.trim($(this).find('input[placeholder="key"]').val());
     		var value = $.trim($(this).find('input[placeholder="value"]').val());
+    		var fieldType = $(this).find('select').val();
     		if(key!=''){
-    			params[key] = value;
+    			params[key] = fieldType + '|' + value;
     		}
     	});
     }
@@ -347,7 +348,6 @@ function addBodyParam(id) {
     	$('#form-data tr').last().find('select').val('text').change();
     	var filePickerId = 'filePicker'+new Date().getTime();
     	$('#form-data tr').last().find('.filePicker').attr('id',filePickerId).html('选择文件');
-    	createWebUploader(filePickerId);
     }
 }
 function addParam(id) {
@@ -426,14 +426,16 @@ $(function(){
 	$('.fieldType').change(function(){
 		if($(this).val()=='file'){
 			$(this).parent().prev().find('input').hide();
-			$(this).parent().prev().find('div').show();
+			var $filePicker = $(this).parent().prev().find('div');
+			$filePicker.show();
+			if($filePicker.html()=='选择文件'){
+				createWebUploader($filePicker.attr('id'));
+			}
 		}else{
 			$(this).parent().prev().find('input').show();
 			$(this).parent().prev().find('div').hide();
 		}
 	});
-	// 第一栏上传控件
-	createWebUploader('filePicker');
 });
 //获取QueryString的数组
 function getQueryString(url){
@@ -473,7 +475,7 @@ function createWebUploader(id){
     	layer.closeAll();
         console.log(file);
         console.log(data);
-        $('#'+id).siblings('input').val(data.fileName+";"+data.url);
+        $('#'+id).siblings('input').val(data.fileName+"|"+data.url);
 	});
 	uploader.on('uploadError', function(file,reason) {
 		layer.closeAll();
