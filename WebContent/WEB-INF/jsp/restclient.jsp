@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-<title>月光边境</title>
+<title>zcoder-rest客户端</title>
 <meta name="keywords" content="关键词" />
 <meta name="description" content="描述" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -14,6 +14,7 @@
 <script type="text/javascript" src="${ctx }/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="${ctx }/static/js/pintuer.js"></script>
 <script type="text/javascript" src="${ctx }/plugins/layer/layer.js"></script>
+<script type="text/javascript" src="${ctx }/plugins/layer/extend/layer.ext.js"></script>
 
 <link rel="stylesheet" href="${ctx }/tools/css/codemirror.css" />
 <link rel="stylesheet" href="${ctx }/tools/css/jsoneditor.min.css" />
@@ -24,6 +25,7 @@
 <script type="text/javascript" src="${ctx }/tools/js/ObjTree.min.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/json-format.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/xml.js"></script>
+<script type="text/javascript" src="${ctx }/tools/js/format.js"></script>
 <script type="text/javascript" src="${ctx }/tools/js/htmlmixed.js"></script>
 
 <script type="text/javascript" src="${ctx }/tools/js/foldcode.js"></script>
@@ -74,6 +76,11 @@ div.jsoneditor-outer{
 }
 .table td{border:none}
 .icon-arrow-circle-up{display: none}
+.fileSpan{
+	margin-left:10px;
+    top: 10px;
+    position: absolute;
+}
 </style>
 </head>
 <body>
@@ -94,8 +101,8 @@ div.jsoneditor-outer{
 			<table class="table table-condensed" style="display: none">
 				<tbody id="pathParam">
 					<tr>
-						<td><input type="text" placeholder="key" class="input auto" /></td>
-						<td><input type="text" placeholder="value" class="input auto" /></td>
+						<td><input type="text" placeholder="key" class="input" /></td>
+						<td><input type="text" placeholder="value" class="input" /></td>
 						<td><a href="javascript:;" onclick="addPathParam()" class="icon-plus-circle text-green text-big"></a></td>
 					</tr>
 				</tbody>
@@ -114,8 +121,8 @@ div.jsoneditor-outer{
 					<table class="table table-condensed">
 						<tbody id="headerParam">
 							<tr>
-								<td><input type="text" placeholder="key" class="input auto" /></td>
-								<td><input type="text" placeholder="value" class="input auto" /></td>
+								<td><input type="text" placeholder="key" class="input" /></td>
+								<td><input type="text" placeholder="value" class="input" /></td>
 								<td><a href="javascript:;" onclick="addHeaderParam()" class="icon-plus-circle text-green text-big"></a></td>
 							</tr>
 						</tbody>
@@ -134,10 +141,10 @@ div.jsoneditor-outer{
 					<table class="table table-condensed">
 						<tbody id="form-data">
 							<tr>
-								<td><input type="text" placeholder="key" class="input auto" /></td>
-								<td>
-								<input type="text" placeholder="value" class="input auto" />
-								<div class="filePicker" id="filePicker" style="display: none;">选择文件</div>
+								<td width="45%"><input type="text" placeholder="key" class="input" /></td>
+								<td width="45%">
+								<input type="text" placeholder="value" class="input" />
+								<div class="filePicker" id="filePicker" style="display: none;height: 34px;overflow: hidden;">选择文件</div>
 								</td>
 								<td width="50px">
 									<select class="input input-auto fieldType">
@@ -154,8 +161,8 @@ div.jsoneditor-outer{
 					<table class="table table-condensed">
 						<tbody id="x-www-form-urlencoded">
 							<tr>
-								<td><input type="text" placeholder="key" class="input auto" /></td>
-								<td><input type="text" placeholder="value" class="input auto" /></td>
+								<td><input type="text" placeholder="key" class="input" /></td>
+								<td><input type="text" placeholder="value" class="input" /></td>
 								<td><a href="javascript:;" onclick="addBodyParam('x-www-form-urlencoded')" class="icon-plus-circle text-green text-big"></a></td>
 							</tr>
 						</tbody>
@@ -233,7 +240,7 @@ function sendRequest() {
     $('#headerParam tr').each(function(){
     	var key = $.trim($(this).find('input[placeholder="key"]').val());
 		var value = $.trim($(this).find('input[placeholder="value"]').val());
-		if(key!=''){
+		if(key!='' && value!=''){
 			headers[key] = value;
 		}
     });
@@ -248,7 +255,11 @@ function sendRequest() {
     		var value = $.trim($(this).find('input[placeholder="value"]').val());
     		var fieldType = $(this).find('select').val();
     		if(key!=''){
-    			params[key] = fieldType + '|' + value;
+    			if(bodyType=='form-data'){
+	    			params[key] = fieldType + '|' + value;
+    			}else{
+	    			params[key] = value;
+    			}
     		}
     	});
     }
@@ -263,6 +274,7 @@ function sendRequest() {
 		dataType : 'json',
 		data : JSON.stringify(data),
 		success : function(data) {
+			layer.closeAll();
 	        if (data.errMsg == 'success') {
 	            var response = data.data;
 	            var cookies = response.cookies;
@@ -274,21 +286,26 @@ function sendRequest() {
 	                $('a[href="#tab-Body"]').click();
 	                $('#jsonEditor').show();
 	                $('#response .CodeMirror').hide();
-	            } else if (headers['Content-Type'].indexOf('application/xml')>-1) {
-	                body = $.format(body, {
-	                    method: 'xml'
-	                });
-	                xmlEditor.setValue(body);
-	                $('a[href="#tab-Body"]').click();
-	                $('#response .CodeMirror').show();
-	                $('#jsonEditor').hide();
-	                xmlEditor.setCursor(0);
-	            } else{
-	                xmlEditor.setValue(body);
-	                $('a[href="#tab-Body"]').click();
-	                $('#response .CodeMirror').show();
-	                $('#jsonEditor').hide();
-	                xmlEditor.setCursor(0);
+	            } else {
+	            	if (headers['Content-Type'].indexOf('application/xml')>-1) {
+		                body = $.format(body, {
+		                    method: 'xml'
+		                });
+		            } else if (headers['Content-Type'].indexOf('text/html')>-1) {
+		                body = style_html(body, 1, '\t');
+		            } else if (headers['Content-Type'].indexOf('image/')>-1) {
+		                body = '<img src="'+url+'"/>';
+		                layer.photos({
+		                    photos: {
+		                    	"data": [{"src": url }]
+		                    }
+		                });
+		            }
+		            xmlEditor.setValue(body);
+		            $('a[href="#tab-Body"]').click();
+		            $('#response .CodeMirror').show();
+		            $('#jsonEditor').hide();
+		            xmlEditor.setCursor(0);
 	            }
 	            $('#tab-Cookies').html('');
 	            $('#tab-Headers').html('');
@@ -327,7 +344,6 @@ function sendRequest() {
                 $('#jsonEditor').hide();
                 xmlEditor.setCursor(0);
 	        }
-	        layer.closeAll();
 		}   
     });
 }
@@ -412,7 +428,7 @@ $(function(){
 	//切换bodyParam
 	$('input[name="bodyType"]').click(function(){
 		$('#tab-body>div').hide();
-		$('#'+$(this).val()).show();
+		$('#tab-body>div').eq($(this).index()).show();
 		if($(this).val()=='raw'){
 			if(rawEditor==undefined){
 				rawEditor = getCodeEditor('rawEditor','Text');
@@ -427,12 +443,12 @@ $(function(){
 		if($(this).val()=='file'){
 			$(this).parent().prev().find('input').hide();
 			var $filePicker = $(this).parent().prev().find('div');
-			$filePicker.show();
+			$filePicker.show().find('.fileSpan').html('');
 			if($filePicker.html()=='选择文件'){
 				createWebUploader($filePicker.attr('id'));
 			}
 		}else{
-			$(this).parent().prev().find('input').show();
+			$(this).parent().prev().find('input').show().val('');
 			$(this).parent().prev().find('div').hide();
 		}
 	});
@@ -473,9 +489,13 @@ function createWebUploader(id){
 	// 文件上传成功
     uploader.on( 'uploadSuccess', function(file,data) {
     	layer.closeAll();
-        console.log(file);
-        console.log(data);
         $('#'+id).siblings('input').val(data.fileName+"|"+data.url);
+        var $span = $('#'+id).find('.fileSpan');
+        if($span.length > 0){
+        	$span.html(data.fileName);
+        }else{
+        	$('#'+id).append('<span class="fileSpan">'+data.fileName+'</span>');
+        }
 	});
 	uploader.on('uploadError', function(file,reason) {
 		layer.closeAll();

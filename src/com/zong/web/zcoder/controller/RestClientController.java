@@ -1,6 +1,7 @@
 package com.zong.web.zcoder.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.request.HttpRequestWithBody;
+import com.mashape.unirest.request.body.MultipartBody;
 import com.zong.zdb.util.PageData;
 
 /**
@@ -35,8 +38,6 @@ public class RestClientController {
 	// 模拟浏览器访问
 	public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31";
 
-	public static final String CONTENT_TYPE = "Content-Type";
-
 	@RequestMapping
 	public String restclient(Model model) {
 		model.addAttribute("nav", "rest");
@@ -46,31 +47,68 @@ public class RestClientController {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@ResponseBody
 	@RequestMapping(value = "/request", method = RequestMethod.POST)
-	public PageData request(@RequestBody PageData request) {
+	public PageData request(@RequestBody PageData request, HttpServletRequest res) {
 		PageData result = new PageData("errMsg", "success");
 		try {
 			String method = request.getString("method");
 			String url = request.getString("url");
 			Map headers = (Map) request.get("headers");
 			Map params = (Map) request.get("params");
-			String contentType = (String) headers.get(CONTENT_TYPE);
-			String accept = "application/json; charset=utf-8";
-			String location = url.split("\\?")[0];
-			if (location.lastIndexOf(".") >= 0) {
-				String suffix = location.substring(location.lastIndexOf(".")).replace(".", "");
-				if (suffix.equals("xml")) {
-					accept = "application/xml; charset=utf-8";
+			String contentType = (String) headers.get("Content-Type");
+			// 期望获得数据格式，根据后缀判断
+			String accept = (String) headers.get("Accept");
+			if (accept == null) {
+				String location = url.split("\\?")[0];
+				if (location.lastIndexOf(".") >= 0) {
+					String suffix = location.substring(location.lastIndexOf(".")).replace(".", "");
+					if (suffix.equals("json")) {
+						accept = "application/json; charset=utf-8";
+					} else if (suffix.equals("xml")) {
+						accept = "application/xml; charset=utf-8";
+					}
+				}
+				if (accept != null) {
+					headers.put("Accept", accept);
 				}
 			}
-			headers.put("Accept", accept);
 			HttpResponse<String> response = null;
 			if (method.equals("GET")) {
 				response = Unirest.get(url).headers(headers).asString();
 			} else {
 				if (contentType.equals("form-data")) {
-					response = Unirest.post(url).headers(headers).fields(params).asString();
-					// 上传文件
+					// 有文件上传时，unirest会自动加上头部，这里删除页面传来的
+					headers.remove("Content-Type");
+					HttpRequestWithBody requestWithBody = Unirest.post(url).headers(headers);
+					// 上传文件或者上传文件和文本同时提交必须使用MultipartBody
+					MultipartBody multipartBody = null;
+					for (Object key : params.keySet()) {
+						String[] arr = params.get(key).toString().split("\\|");
+						String fieldType = arr[0];
+						if (fieldType.equals("text")) {
+							if (multipartBody == null) {
+								multipartBody = requestWithBody.field(key.toString(), arr[1]);
+							} else {
+								multipartBody = multipartBody.field(key.toString(), arr[1]);
+							}
+						} else {// 文件取出地址，从服务器读出来提交
+							String fileName = arr[1];
+							String filePath = res.getServletContext().getRealPath(arr[2]);
+							if (multipartBody == null) {
+								multipartBody = requestWithBody.field(key.toString(), new FileInputStream(filePath),
+										fileName);
+							} else {
+								multipartBody = multipartBody.field(key.toString(), new FileInputStream(filePath),
+										fileName);
+							}
+						}
+					}
+					if (multipartBody == null) {
+						response = requestWithBody.asString();
+					} else {
+						response = multipartBody.asString();
+					}
 				} else if (contentType.equals("x-www-form-urlencoded")) {
+					headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 					if (method.equals("POST")) {
 						response = Unirest.post(url).headers(headers).fields(params).asString();
 					} else if (method.equals("PUT")) {
@@ -99,7 +137,11 @@ public class RestClientController {
 					PageData cookies = new PageData();
 					String[] arr = hs.getFirst(key).split(";");
 					for (String value : arr) {
-						cookies.put(value.split("=")[0], value.split("=")[1]);
+						value = value.trim();
+						if (!value.equals("")) {
+							String[] arrs = value.split("=");
+							cookies.put(arrs[0], arrs.length > 1 ? arrs[1] : "");
+						}
 					}
 					data.put("cookies", cookies);
 				}
