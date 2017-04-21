@@ -78,35 +78,15 @@ public class RestClientController {
 				if (contentType.equals("form-data")) {
 					// 有文件上传时，unirest会自动加上头部，这里删除页面传来的
 					headers.remove("Content-Type");
-					HttpRequestWithBody requestWithBody = Unirest.post(url).headers(headers);
-					// 上传文件或者上传文件和文本同时提交必须使用MultipartBody
-					MultipartBody multipartBody = null;
-					for (Object key : params.keySet()) {
-						String[] arr = params.get(key).toString().split("\\|");
-						String fieldType = arr[0];
-						if (fieldType.equals("text")) {
-							if (multipartBody == null) {
-								multipartBody = requestWithBody.field(key.toString(), arr[1]);
-							} else {
-								multipartBody = multipartBody.field(key.toString(), arr[1]);
-							}
-						} else {// 文件取出地址，从服务器读出来提交
-							String fileName = arr[1];
-							String filePath = res.getServletContext().getRealPath(arr[2]);
-							if (multipartBody == null) {
-								multipartBody = requestWithBody.field(key.toString(), new FileInputStream(filePath),
-										fileName);
-							} else {
-								multipartBody = multipartBody.field(key.toString(), new FileInputStream(filePath),
-										fileName);
-							}
-						}
+					HttpRequestWithBody requestWithBody = null;
+					if (method.equals("POST")) {
+						requestWithBody = Unirest.post(url).headers(headers);
+					} else if (method.equals("PUT")) {
+						requestWithBody = Unirest.put(url).headers(headers);
+					} else if (method.equals("DELETE")) {
+						requestWithBody = Unirest.delete(url).headers(headers);
 					}
-					if (multipartBody == null) {
-						response = requestWithBody.asString();
-					} else {
-						response = multipartBody.asString();
-					}
+					response = formData(requestWithBody, headers, params, res);
 				} else if (contentType.equals("x-www-form-urlencoded")) {
 					headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 					if (method.equals("POST")) {
@@ -155,6 +135,41 @@ public class RestClientController {
 			result.put("errMsg", e.getMessage());
 		}
 		return result;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private HttpResponse<String> formData(HttpRequestWithBody requestWithBody, Map headers, Map params,
+			HttpServletRequest res) throws Exception {
+		HttpResponse<String> response = null;
+		// 上传文件或者上传文件和文本同时提交必须使用MultipartBody
+		MultipartBody multipartBody = null;
+		for (Object key : params.keySet()) {
+			String[] arr = params.get(key).toString().split("\\|");
+			String fieldType = arr[0];
+			if (fieldType.equals("text")) {
+				if (multipartBody == null) {
+					multipartBody = requestWithBody.field(key.toString(), arr[1]);
+				} else {
+					multipartBody = multipartBody.field(key.toString(), arr[1]);
+				}
+			} else {// 有文件参数且存在文件则取出地址，从服务器读出来提交
+				if (arr.length == 3) {
+					String fileName = arr[1];
+					String filePath = res.getServletContext().getRealPath("/" + arr[2]);
+					if (multipartBody == null) {
+						multipartBody = requestWithBody.field(key.toString(), new FileInputStream(filePath), fileName);
+					} else {
+						multipartBody = multipartBody.field(key.toString(), new FileInputStream(filePath), fileName);
+					}
+				}
+			}
+		}
+		if (multipartBody == null) {
+			response = requestWithBody.asString();
+		} else {
+			response = multipartBody.asString();
+		}
+		return response;
 	}
 
 	/**

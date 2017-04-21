@@ -1,11 +1,16 @@
 package com.zong.listener;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.log4j.Logger;
 
+import com.zong.util.FileUtils;
 import com.zong.zdb.util.ZDBConfig;
 
 /**
@@ -28,6 +33,24 @@ public class ConfigListener implements ServletContextListener {
 			logger.info("======加载config.json");
 			ServletContext application = event.getServletContext();
 			application.setAttribute("configData", ZDBConfig.readConfig());
+			// 清空之前restclient测试上传的文件
+			File file = new File(application.getRealPath("/upload"));
+			if (file.exists()) {
+				// 文件目录按时间归类文件夹
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+				int today = Integer.parseInt(dateFormat.format(new Date()));
+				for (File f : file.listFiles()) {
+					try {
+						if (Integer.parseInt(f.getName()) < today) {
+							// 先删除下面的文件再删除文件夹
+							FileUtils.removeAllFile(f.getAbsolutePath());
+							f.delete();
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		} catch (Exception e) {
 			logger.error("加载配置文件失败", e);
 		}
