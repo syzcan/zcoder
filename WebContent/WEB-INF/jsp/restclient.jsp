@@ -39,7 +39,7 @@
 <link rel="stylesheet" href="${ctx }/plugins/webuploader/webuploader.css" />
 <script type="text/javascript" src="${ctx }/plugins/webuploader/webuploader.min.js"></script>
 <style type="text/css">
-body{font-size: 13px}
+#rest-panel{font-size: 13px}
 div.jsoneditor-menu {
 	background-color: #0ae;
 	border: 1px solid #0ae;
@@ -74,18 +74,24 @@ div.jsoneditor-outer{
 .CodeMirror-foldgutter{
 	width: 11px;
 }
-.table td{border:none}
+.tab .tab-nav li a{padding:5px 20px}
 .icon-arrow-circle-up{display: none}
+.webuploader-pick{padding-top:6px;border-radius:0}
+.filePicker{
+display: none;height: 30px;border-bottom:1px solid #ddd;overflow: hidden;
+}
 .fileSpan{
 	margin-left:10px;
-    top: 10px;
+    top: 6px;
     position: absolute;
 }
+.table td{border:none;padding:0 5px}
+.table .input{border-top:none;border-left:none;border-right:none;box-shadow:none;border-radius:0;background: none;height: 30px;font-size:13px}
 </style>
 </head>
 <body>
 	<%@ include file="/WEB-INF/jsp/common/nav.jsp"%>
-	<div class="margin">
+	<div id="rest-panel" class="margin">
 		<div class="border">
 		<div class="padding bg">
 			<select class="input input-auto border-main" id="method" style="border-top-right-radius:0;border-bottom-right-radius:0">
@@ -98,7 +104,7 @@ div.jsoneditor-outer{
 			<input type="button" value="Send" onclick="sendRequest()" class="button bg-main" style="border-left: 0 none;margin-left: -5px;border-top-left-radius:0;border-bottom-left-radius:0" />
 			<input type="button" value="Params" class="button border-main" onclick="showPathParam(this)" />
 			<div class="padding-small">
-			<table class="table table-condensed" style="display: none">
+			<table class="table table-condensed table-hover" style="display: none">
 				<tbody id="pathParam">
 					<tr>
 						<td><input type="text" placeholder="key" class="input" /></td>
@@ -118,7 +124,7 @@ div.jsoneditor-outer{
 			</div>
 			<div class="tab-body">
 				<div class="tab-panel padding active" id="tab-header" style="margin-top: -10px">
-					<table class="table table-condensed">
+					<table class="table table-condensed table-hover">
 						<tbody id="headerParam">
 							<tr>
 								<td><input type="text" placeholder="key" class="input" /></td>
@@ -138,13 +144,13 @@ div.jsoneditor-outer{
 						<option value="text/plain;charset=UTF-8">text/plain</option>
 					</select>
 					<div style="margin-top: 10px">
-					<table class="table table-condensed">
+					<table class="table table-condensed table-hover">
 						<tbody id="form-data">
 							<tr>
 								<td width="45%"><input type="text" placeholder="key" class="input" /></td>
 								<td width="45%">
 								<input type="text" placeholder="value" class="input" />
-								<div class="filePicker" id="filePicker" style="display: none;height: 34px;overflow: hidden;">选择文件</div>
+								<div class="filePicker" id="filePicker">选择文件</div>
 								</td>
 								<td width="50px">
 									<select class="input input-auto fieldType">
@@ -158,7 +164,7 @@ div.jsoneditor-outer{
 					</table>
 					</div>
 					<div style="margin-top: 10px;display: none;">
-					<table class="table table-condensed">
+					<table class="table table-condensed table-hover">
 						<tbody id="x-www-form-urlencoded">
 							<tr>
 								<td><input type="text" placeholder="key" class="input" /></td>
@@ -396,25 +402,39 @@ function updatePathParam(){
 	}
 	$('#url').val(url);
 }
-//地址参数自动更新
+
 $(function(){
-	$('#pathParam input[placeholder="key"],#pathParam input[placeholder="value"]').keyup(function(){
-		updatePathParam();
-	});
-	$('#url').keyup(function(){
-		var url = $('#url').val();
-		$('#pathParam input').val('');
-		$.each(getQueryString(url),function(i,n){
-			$('#pathParam tr').eq(i).find('input[placeholder="key"]').val(n.split('=')[0]);
-			$('#pathParam tr').eq(i).find('input[placeholder="value"]').val(n.split('=')[1]);
-		});
-		$('#pathParam tr').each(function(){
-			var key = $.trim($(this).find('input[placeholder="key"]').val());
-			if(key=='' && $(this).find('a').hasClass('icon-minus-circle')){
+	//修改pathParam参数项更新到地址栏
+	$('#pathParam input[placeholder="key"]').keyup(function(){
+		$('#pathParam tr:gt(0)').each(function(){
+			if($.trim($(this).find('input:eq(0)').val())==''){
 				$(this).remove();
 			}
 		});
-		$('#pathParam a.icon-minus-circle')
+		updatePathParam();
+	});
+	$('#pathParam input[placeholder="value"]').keyup(function(){
+		updatePathParam();
+	});
+	//修改地址栏动态更新pathParam参数项
+	$('#url').keyup(function(){
+		var url = $('#url').val();
+		$('#pathParam input').val('');
+		var params = getQueryString(url);
+		if($('#pathParam tr').length > params.length && params.length!=0){
+			$('#pathParam tr:gt('+(params.length-1)+')').remove();
+		} else if($('#pathParam tr').length < params.length){
+			for(var i=1;i<=params.length-$('#pathParam tr').length;i++){
+				addPathParam();
+			}
+		}
+		$.each(params,function(i,n){
+			var arr = n.split('=');
+			var key = arr[0];
+			var value = arr.length>1?arr[1]:0;
+			$('#pathParam tr').eq(i).find('input[placeholder="key"]').val(key);
+			$('#pathParam tr').eq(i).find('input[placeholder="value"]').val(value);
+		});
 	});
 	//选择请求方法,GET不显示body参数框
 	$('#method').change(function(){
@@ -455,7 +475,7 @@ $(function(){
 });
 //获取QueryString的数组
 function getQueryString(url){
-     var result = url.match(new RegExp("[\?\&][^\?\&]+=[^\?\&]+","g")); 
+     var result = url.match(new RegExp("[\?\&][^\?\&]+=[^\?\&]*","g")); 
      if(result == null){
          return "";
      }
@@ -502,5 +522,28 @@ function createWebUploader(id){
 		layer.msg('上传失败:'+reason);
 	});
 }
+//根据传递参数快速构建页面
+$(function(){
+	var operation = '${param.operation}';
+	if(operation==''){
+		return;
+	}
+	$('#method').val('POST').trigger('change');
+	$('a[href="#tab-body"]').click();
+	$('input[name="bodyType"][value="x-www-form-urlencoded"]').click();
+	$('#x-www-form-urlencoded input:eq(0)').val('craw_url');
+	$('#x-www-form-urlencoded input:eq(1)').focus();
+	$('#x-www-form-urlencoded a.icon-plus-circle').click().click();
+	var domain = location.href.split('/restclient')[0];
+	//爬取详情，爬取列表
+	if(operation=='craw_detail'){
+		$('#url').val(domain+'/craw/data.json');
+	} else if(operation=='craw_list'){
+		$('#url').val(domain+'/craw/list.json');
+		$('#x-www-form-urlencoded tr:eq(1) input:eq(0)').val('craw_item');
+		$('#x-www-form-urlencoded tr:eq(2) input:eq(0)').val('craw_next');
+		$('#x-www-form-urlencoded a.icon-plus-circle').click().click();
+	}
+});
 </script>
 </html>

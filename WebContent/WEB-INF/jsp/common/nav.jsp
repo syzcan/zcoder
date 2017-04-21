@@ -13,7 +13,6 @@
 				<ul class="nav nav-inline nav-menu">
 					<li class="${nav=='config'?'active':'' }"><a class="icon-cog" href="javascript:;"> 设置<span class="arrow"></span></a>
 						<ul class="drop-menu">
-							
 							<li><a href="${ctx}/config/config"><span class="icon-cogs"></span> 数据源</a></li>
 							<li><a class="icon-file" href="${ctx}/templates"> 代码模板</a></li>
 						</ul></li>
@@ -27,7 +26,12 @@
 						</ul>
 					</li>	
 					<li class="${nav=='code'?'active':'' }"><a class="icon-code" href="${ctx}/code"> 代码高亮</a></li>
-					<li class="${nav=='rest'?'active':'' }"><a class="icon-pagelines" href="${ctx}/restclient"> rest测试</a></li>
+					<li class="${nav=='rest'?'active':'' }"><a class="icon-pagelines" href="${ctx}/restclient"> rest测试<span class="arrow"></span></a>
+						<ul class="drop-menu">
+							<li><a href="${ctx}/restclient?operation=craw_detail">craw详情</a></li>
+							<li><a href="${ctx}/restclient?operation=craw_list">craw列表</a></li>
+						</ul>	
+					</li>
 					<li><a class="icon-wrench" href="javascript:;"> 菜鸟工具<span class="arrow"></span></a>
 						<ul class="drop-menu">
 							<li><a href="${ctx}/tools/html.jsp">HTML格式化</a></li>
