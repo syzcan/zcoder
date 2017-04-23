@@ -139,9 +139,9 @@ display: none;height: 30px;border-bottom:1px solid #ddd;overflow: hidden;
 					<input class="margin-left" type="radio" name="bodyType" value="x-www-form-urlencoded" /> x-www-form-urlencoded
 					<input class="margin-left" type="radio" name="bodyType" value="raw" /> raw 
 					<select id="rawType" style="display: none">
-						<option value="application/json;charset=UTF-8">application/json</option>
-						<option value="application/xml;charset=UTF-8">application/xml</option>
 						<option value="text/plain;charset=UTF-8">text/plain</option>
+						<option value="application/xml;charset=UTF-8">application/xml</option>
+						<option value="application/json;charset=UTF-8">application/json</option>
 					</select>
 					<div style="margin-top: 10px">
 					<table class="table table-condensed table-hover">
@@ -175,7 +175,8 @@ display: none;height: 30px;border-bottom:1px solid #ddd;overflow: hidden;
 					</table>
 					</div>
 					<div id="raw" style="margin-top: 10px;display: none;">
-						<textarea id="rawEditor" style="width: 100%;height: 200px;resize:none"></textarea>
+						<div id="rawEditorJson" class="raw-item" style="width: 100%;height: 200px;display: none;"></div>
+						<textarea id="rawEditor" class="raw-item" style="width: 100%;height: 200px;resize:none"></textarea>
 					</div>
 				</div>
 			</div>
@@ -234,6 +235,10 @@ function sendRequest() {
     var url = $.trim($('#url').val());
     var bodyType = $('input[name="bodyType"]:checked').val();
     var reg = /^[a-zA-z]+:\/\/[^\s]*$/;
+    if(url==''){
+    	layer.msg('请填写请求地址');
+    	return;
+    }
     if (!reg.test(url)) {
         layer.msg('请求地址格式错误');
         return;
@@ -253,7 +258,14 @@ function sendRequest() {
     if(bodyType=='raw'){
     	var rawType = $('#rawType').val();
     	headers['Content-Type'] = rawType;
-    	params['payload'] = rawEditor.getValue();
+    	var value = '';
+    	//CodeMirror取值用getValue
+		if(typeof rawEditor.getValue === 'function'){
+			value = rawEditor.getValue();
+		}else{//JsonEditor取值用getText
+			value = rawEditor.getText();
+		}
+    	params['payload'] = value;
     }else{
     	headers['Content-Type'] = bodyType;
     	$('#'+bodyType).find('tr').each(function(){
@@ -470,6 +482,35 @@ $(function(){
 		}else{
 			$(this).parent().prev().find('input').show().val('');
 			$(this).parent().prev().find('div').hide();
+		}
+	});
+	// 切换raw输入框展示
+	$('#rawType').change(function(){
+		var value = '';
+		if(typeof rawEditor.getValue === 'function'){
+			value = rawEditor.getValue();
+		}else{
+			value = rawEditor.getText();
+		}
+		$('#raw').children().filter('[class!=raw-item]').remove();
+		$('#rawEditorJson').html('');
+		if($(this).val().indexOf('application/xml')>-1){
+			$('#rawEditor').show();
+			$('#rawEditorJson').hide();
+			rawEditor = getCodeEditor('rawEditor','XML');
+			rawEditor.getDoc().setValue(value);
+		}else if($(this).val().indexOf('text/plain')>-1){
+			$('#rawEditor').show();
+			$('#rawEditorJson').hide();
+			rawEditor = getCodeEditor('rawEditor','Text');
+			rawEditor.getDoc().setValue(value);
+		}else{
+			$('#rawEditor').hide();
+			$('#rawEditorJson').show();
+			rawEditor = new JSONEditor($('#rawEditorJson')[0], {
+			    mode: 'code'
+			});
+			rawEditor.setText(value);
 		}
 	});
 });
