@@ -70,7 +70,7 @@ table tr:hover .beanField input{background: #f5f5f5}
 							</td>
 							<td class="text-green">${column.jdbcType }</td>
 							<td class="text-blue">${column.javaType }</td>
-							<td>${column.columnType }</td>
+							<td>${column.dataType }</td>
 							<td>
 							<c:if test="${column.jdbcType!='DECIMAL' && column.jdbcType!='INTEGER' }">
 							${column.dataLength }

@@ -1,5 +1,7 @@
 package com.zong.web.zcoder.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -8,11 +10,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zong.util.JsoupUtil;
 import com.zong.util.PageData;
+import com.zong.zdb.service.JdbcCodeService;
 
 @Controller
 @RequestMapping("/craw")
 public class CrawController extends BaseController {
 	private Logger logger = LoggerFactory.getLogger(CrawController.class);
+	private JdbcCodeService codeService = JdbcCodeService.getInstance();
 
 	/**
 	 * 解析任何页面
@@ -51,6 +55,7 @@ public class CrawController extends BaseController {
 		try {
 			PageData pd = super.getPageData();
 			result = JsoupUtil.parseList(pd);
+			saveData(pd.getString("craw_store"), result);
 			result.put("errMsg", "success");
 		} catch (Exception e) {
 			logger.error(e.toString(), e);
@@ -59,4 +64,19 @@ public class CrawController extends BaseController {
 		return result;
 	}
 
+	@SuppressWarnings({ "unused", "unchecked" })
+	private void saveData(String craw_store, PageData parseData) throws Exception {
+		if (craw_store == null || "".equals(craw_store)) {
+			return;
+		}
+		String[] arr = craw_store.split(";");
+		List<PageData> list = (List<PageData>) parseData.get("data");
+		for (PageData data : list) {
+			com.zong.zdb.util.PageData pd = new com.zong.zdb.util.PageData();
+			for (Object key : data.keySet()) {
+				pd.put(key, data.get(key));
+			}
+			codeService.insert(arr[0], arr[1], pd);
+		}
+	}
 }

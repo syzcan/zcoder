@@ -283,7 +283,7 @@ function sendRequest() {
     }
     data.headers = headers;
     data.params = params;
-    layer.load(1);
+    layer.load(1,{shade: 0});
     var startTime = new Date();
     $.ajax({
 		url : '${ctx}/restclient/request.json',
@@ -354,6 +354,29 @@ function sendRequest() {
 	            $('#statusMsg').show();
 	            $('#statusMsg').find('span:eq(0)').html(response.statusCode+' '+response.statusText);
 	            $('#statusMsg').find('span:eq(1)').html(time+' ms');
+	            
+	            //爬取列表，判断是否继续下一页
+	            if('${param.operation}'=='craw_list'){
+	            	var json = $.parseJSON(body);
+	            	if(json.craw_next!=''){
+	            		var craw_next = '';
+	            		$('#x-www-form-urlencoded input').each(function(){
+	            			if($(this).val()=='craw_next'){
+	            				craw_next = $(this).parent().next().find('input').val();
+	            				return false;
+	            			}
+	            		});
+	            		if(/;auto$/.test(craw_next)){
+	            			$('#x-www-form-urlencoded input').each(function(){
+		            			if($(this).val()=='craw_url'){
+		            				craw_next = $(this).parent().next().find('input').val(json.craw_next);
+		            				return false;
+		            			}
+		            		});
+	            			sendRequest();
+	            		}
+	            	}
+	            }
 	        } else {
 	            //layer.msg(data.errMsg);
 	            xmlEditor.setValue(data.errMsg);
@@ -572,18 +595,29 @@ $(function(){
 	$('#method').val('POST').trigger('change');
 	$('a[href="#tab-body"]').click();
 	$('input[name="bodyType"][value="x-www-form-urlencoded"]').click();
-	$('#x-www-form-urlencoded input:eq(0)').val('craw_url');
-	$('#x-www-form-urlencoded input:eq(1)').focus();
-	$('#x-www-form-urlencoded a.icon-plus-circle').click().click();
+	var $from = $('#x-www-form-urlencoded');
+	$from.find('input:eq(0)').val('craw_url');
+	$from.find('input:eq(1)').focus();
+	$from.find('a.icon-plus-circle').click().click();
 	var domain = location.href.split('/restclient')[0];
 	//爬取详情，爬取列表
 	if(operation=='craw_detail'){
 		$('#url').val(domain+'/craw/data.json');
+		$from.find('tr:eq(1) input:eq(1)').val(';text');
+		$from.find('tr:eq(2) input:eq(1)').val(';text');
 	} else if(operation=='craw_list'){
 		$('#url').val(domain+'/craw/list.json');
-		$('#x-www-form-urlencoded tr:eq(1) input:eq(0)').val('craw_item');
-		$('#x-www-form-urlencoded tr:eq(2) input:eq(0)').val('craw_next');
-		$('#x-www-form-urlencoded a.icon-plus-circle').click().click();
+		$from.find('a.icon-plus-circle').click().click().click();
+		$from.find('tr:eq(1) input:eq(0)').val('craw_item');
+		$from.find('tr:eq(2) input:eq(0)').val('craw_next');
+		//craw_next规则值结尾是 ;auto 则自动爬取下一页
+		$from.find('tr:eq(2) input:eq(1)').val(';attr;href;');
+		$from.find('tr:eq(3) input:eq(0)').val('craw_store');
+		
+		$from.find('tr:eq(4) input:eq(0)').val('title');
+		$from.find('tr:eq(4) input:eq(1)').val(';text');
+		$from.find('tr:eq(5) input:eq(0)').val('url');
+		$from.find('tr:eq(5) input:eq(1)').val(';attr;href');
 	}
 });
 </script>

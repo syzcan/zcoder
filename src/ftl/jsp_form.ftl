@@ -12,7 +12,7 @@
 					<label><#if columnField.remark ?? && columnField.remark!="">${columnField.remark}<#else>${columnField.field}</#if></label>
 				</div>
 				<div class="field">
-					<#if columnField.columnType=="text">
+					<#if columnField.dataType=="text">
 					<script type="text/plain" id="${columnField.field}Editor" name="${columnField.field}" style="width:600px;height:240px;">${r"${"}${objectName}.${columnField.field} ${r"}"}</script>
 					<script>UM.getEditor('${columnField.field}Editor');</script>				
 					<#else>

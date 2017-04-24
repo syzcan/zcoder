@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
@@ -23,12 +22,11 @@ import com.zong.zdb.service.JdbcCodeService;
 import com.zong.zdb.service.TemplateRoot;
 import com.zong.zdb.util.Page;
 import com.zong.zdb.util.PageData;
-import com.zong.zdb.util.ZDBConfig;
 
 @Controller
 public class DatabaseController {
 
-	private JdbcCodeService codeService = com.zong.zdb.service.JdbcCodeService.getInstance();
+	private JdbcCodeService codeService = JdbcCodeService.getInstance();
 
 	@RequestMapping(value = "/dbs")
 	public String dbs(Model model) {
