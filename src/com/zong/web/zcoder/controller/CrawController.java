@@ -64,7 +64,7 @@ public class CrawController extends BaseController {
 		return result;
 	}
 
-	@SuppressWarnings({ "unused", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	private void saveData(String craw_store, PageData parseData) throws Exception {
 		if (craw_store == null || "".equals(craw_store)) {
 			return;
