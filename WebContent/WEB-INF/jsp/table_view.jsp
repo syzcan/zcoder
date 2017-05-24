@@ -66,7 +66,7 @@ table tr:hover .beanField input{background: #f5f5f5}
 							<td class="beanField"><input type="text" class="formInput" readonly="readonly" data-field="${column.field }" data-type="${column.javaType }" data-required="${column.canNull=='NO'}"/></td>
 							<td class="beanField"><input type="text" class="data-field" readonly="readonly" data-field="${column.field }" value="${column.field }"/></td>
 							<td ${column.key=='PRI'?' title="主键"':'' }>
-								<span type="text" class="${column.key=='PRI'?' text-red':'' }" readonly="readonly" data-field="${column.column }" >${column.column }</span>
+								<span class="${column.key=='PRI'?' text-red':'' }" data-field="${column.column }" >${column.column }</span>
 							</td>
 							<td class="text-green">${column.jdbcType }</td>
 							<td class="text-blue">${column.javaType }</td>
