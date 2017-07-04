@@ -123,10 +123,20 @@ public class DatabaseController {
 	@ResponseBody
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/beetlCode", method = RequestMethod.POST, produces = "text/plain;charset=utf-8")
 	public String beetlCode(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName,
-			String btl, Model model) {
+			String btl, String objectName, String className, String packageName, Model model) {
 		String result = "";
 		try {
-			result = BeetlUtil.printBtl(btl, TemplateRoot.createTemplateRoot(codeService.showTable(dbname, tableName)));
+			TemplateRoot root = TemplateRoot.createTemplateRoot(codeService.showTable(dbname, tableName));
+			if (objectName != null && !objectName.equals("")) {
+				root.put("objectName", objectName);
+			}
+			if (className != null && !className.equals("")) {
+				root.put("className", className);
+			}
+			if (packageName != null && !packageName.equals("")) {
+				root.put("packageName", packageName);
+			}
+			result = BeetlUtil.printBtl(btl, root);
 		} catch (Exception e) {
 			e.printStackTrace();
 			result = e.toString();

@@ -30,7 +30,7 @@ public class ConfigListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		try {
-			logger.info("======加载config.json");
+			logger.info("======加载zdb.json");
 			ServletContext application = event.getServletContext();
 			application.setAttribute("configData", ZDBConfig.readConfig());
 			// 清空之前restclient测试上传的文件

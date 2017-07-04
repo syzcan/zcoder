@@ -20,6 +20,7 @@
 			<div class="panel-head">
 					数据连接：【${dbname }】 表数量： 【${fn:length(tables) }】
 <!-- 					快速定位：<input name="tableName" placeholder="表名" type="text" class="input input-auto border-main"> -->
+					<input type="button" class="button border-green" value="新增" onclick="window.open('${ctx}/${dbname }/tables/tableForm')" />
 			</div>
 			<table class="table table-hover table-condensed">
 				<thead>

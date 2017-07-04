@@ -201,7 +201,18 @@ public class RestClientController {
 		if (file.getOriginalFilename().lastIndexOf(".") >= 0) {
 			extName = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
 		}
-		path += "/" + random.nextInt(10000) + System.currentTimeMillis() + extName;
+		String randomNum = "";
+		int num = random.nextInt(10000);
+		if (num < 10) {
+			randomNum = "000" + num;
+		} else if (num < 100) {
+			randomNum = "00" + num;
+		} else if (num < 1000) {
+			randomNum = "0" + num;
+		} else {
+			randomNum = "" + num;
+		}
+		path += "/" + System.currentTimeMillis() + randomNum + extName;
 		File f = new File(request.getSession().getServletContext().getRealPath("/" + path));
 		if (!f.getParentFile().exists()) {
 			f.getParentFile().mkdirs();

@@ -106,7 +106,10 @@
 			type:'post',
 			dataType:'text',
 			data:{
-				btl:$('textarea').val()
+				btl:$('textarea').val(),
+				objectName:$.trim($('#objectName').val()),
+				className:$.trim($('#className').val()),
+				packageName:$.trim($('#packageName').val())
 			},
 			success:function(data){
 				//特殊字符转义
