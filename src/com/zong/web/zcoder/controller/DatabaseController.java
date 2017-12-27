@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
@@ -13,11 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zong.util.BeetlUtil;
 import com.zong.util.CreateCodeUtil;
 import com.zong.util.FileUploadDownload;
 import com.zong.util.FileUtils;
 import com.zong.zdb.bean.ColumnField;
+import com.zong.zdb.bean.Table;
 import com.zong.zdb.service.JdbcCodeService;
 import com.zong.zdb.service.TemplateRoot;
 import com.zong.zdb.util.Page;
@@ -27,8 +30,9 @@ import com.zong.zdb.util.PageData;
 public class DatabaseController {
 
 	private JdbcCodeService codeService = JdbcCodeService.getInstance();
+	public final static ObjectMapper mapper = new ObjectMapper();
 
-	@RequestMapping(value = "/dbs")
+	@RequestMapping(value = {"/","/dbs"})
 	public String dbs(Model model) {
 		model.addAttribute("nav", "dbs");
 		return "db_list";
@@ -75,6 +79,31 @@ public class DatabaseController {
 		model.addAttribute("tab", "data");
 		model.addAttribute("nav", "dbs");
 		return "table_datas";
+	}
+	
+	@RequestMapping(value = "/{dbname}/tables/{tableName}/jsons")
+	public String jsons(@PathVariable("dbname") String dbname, @PathVariable("tableName") String tableName, Page page,
+			String orderColumn, String orderType, Model model) {
+		page.setTable(tableName);
+		page.getPd().put("orderColumn", orderColumn).put("orderType", orderType);
+		model.addAttribute("dbname", dbname);
+		model.addAttribute("tableName", tableName);
+		List<ColumnField> columns = codeService.showTableColumns(dbname, tableName);
+		model.addAttribute("columns", columns);
+		List<PageData> list = codeService.showTableData(dbname, page);
+		List<String> datas = new ArrayList<String>();
+		try {
+			for (PageData pd : list) {
+				datas.add(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(pd));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		model.addAttribute("page", page);
+		model.addAttribute("datas", datas);
+		model.addAttribute("tab", "data");
+		model.addAttribute("nav", "dbs");
+		return "table_jsons";
 	}
 
 	@RequestMapping(value = "/{dbname}/tables/{tableName}/sqldatas")
@@ -136,6 +165,12 @@ public class DatabaseController {
 			if (packageName != null && !packageName.equals("")) {
 				root.put("packageName", packageName);
 			}
+			Page page = new Page();
+			page.setTable(tableName);
+			List<PageData> datas = this.codeService.showTableData(dbname, page);
+			if (!datas.isEmpty()) {
+				root.put("data", datas.get(0));
+			}
 			result = BeetlUtil.printBtl(btl, root);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -173,6 +208,30 @@ public class DatabaseController {
 					packageName);
 			// 下载
 			FileUploadDownload.fileDownload(response, filePath, "code_" + tableName + ".zip");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 导出表结构
+	 */
+	@RequestMapping(value = "/{dbname}/tables/tableColumns")
+	public void tableColumns(@PathVariable("dbname") String dbname, HttpServletRequest request,
+			HttpServletResponse response) {
+		try {
+			List<Table> tables = codeService.showTables(dbname);
+			for (Table table : tables) {
+				table.setColumnFields(codeService.showTableColumns(dbname, table.getTableName()));
+			}
+			PageData root = new PageData("tables", tables);
+			String content = BeetlUtil.printString(FileUtils.getClassResources() + "/btl/table_columns.btl", root);
+			// 取消空格
+			content = content.replaceAll(">(\\s+)<", "><");
+			String path = request.getServletContext().getRealPath("/static") + "/table_columns.doc";
+			FileUtils.writeTxt(path, content);
+			// 下载
+			FileUploadDownload.fileDownload(response, path, dbname + "表结构.doc");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

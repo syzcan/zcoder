@@ -23,7 +23,7 @@ table tr:hover .beanField input{background: #f5f5f5}
 </head>
 <body>
 	<%@ include file="/WEB-INF/jsp/common/nav.jsp"%>
-	<div style="position:fixed;top:3px;left:600px;z-index:10;color:white">取值前缀：<input id="prefix" placeholder="el表达式bean名称" type="text" class="input input-auto border-main"></div>
+	
 	<div class="admin">
 		<div class="panel admin-panel">
 			<div class="panel-head">
@@ -47,7 +47,9 @@ table tr:hover .beanField input{background: #f5f5f5}
 							<option value="layui">layui</option>
 							</select>
 						</th>
-						<th width="160px">EL 取值</th>
+						<th style="min-width:150px;max-width:150px;position: relative;">EL 取值
+						<div style="position:absolute;bottom:0;left:60px;"><input id="prefix" placeholder="bean名称" type="text" class="input"></div>
+						</th>
 						<th width="160px">字段【${fn:length(columns) }】</th>
 						<th width="100px">jdbcType</th>
 						<th width="80px">java类型</th>

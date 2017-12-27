@@ -40,6 +40,8 @@
 						<c:if test="${!empty db.dao }">
 						<a class="button border-blue button-little"
 							href="${ctx}/${db['dbname'] }/tables">查看</a>
+						<a class="button border-yellow button-little"
+							href="${ctx}/${db['dbname'] }/tables/tableColumns">导出Word</a>
 							</c:if>
 						<c:if test="${empty db.dao }">
 							<span class="badge bg-red">连接失败</span>

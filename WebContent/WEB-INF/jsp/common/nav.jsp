@@ -18,6 +18,7 @@
 						</ul></li>
 					<li class="${nav=='dbs'?'active':'' }"><a class="icon-database" href="${ctx }/dbs"> 数据连接<span class="arrow"></span></a>
 						<ul class="drop-menu">
+						<li><a href="javascript:;" onclick="reconnent()">重新连接</a></li>
 						<c:forEach items="${configData.dbs }" var="db" varStatus="vs">
 						<c:if test="${!empty db.dao }">
 						<li><a href="${ctx}/${db['dbname'] }/tables">${db['dbname'] }</a></li>
@@ -48,3 +49,12 @@
 	</div>
 </div>
 <a class="icon-arrow-circle-up text-large" style="position: fixed;bottom: 20px;right: 20px" href="#"></a>
+<script>
+function reconnent(){
+	layer.load(1);
+	$.get('${ctx}/config/reconnent').done(function(){
+		layer.closeAll('loading');
+		layer.msg('操作成功');
+	});
+}
+</script>

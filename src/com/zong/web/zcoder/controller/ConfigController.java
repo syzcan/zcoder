@@ -80,6 +80,19 @@ public class ConfigController {
 		}
 		return "Y";
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/config/reconnent")
+	public String reconnent(HttpServletRequest request) {
+		try {
+			String content = FileUtils.readTxt(FileUtils.getClassResources() + "zdb.json");
+			request.getServletContext().setAttribute("configData", ZDBConfig.writeConfig(content));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.toString();
+		}
+		return "Y";
+	}
 
 	@RequestMapping(value = "/code")
 	public String code(Model model) {
